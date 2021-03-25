@@ -1,0 +1,61 @@
+{
+	"EmailsSet":
+			[{
+				"EmailId": "10",
+				"Ability": "Not available",
+				"MMSID": "MMS_10",
+				"Status": "Unknown",
+				"SentOn":"not sent",
+				"ApprovedOn":"not approved",
+				"Validity": "outdated"
+			}, {
+				"EmailId": "20",
+				"Ability": "Available",
+				"MMSID": "MMS_20",
+				"Status": "Approved",
+				"SentOn":"14.03.2021",
+				"ApprovedOn":"14.03.2021",
+				"Validity": "outdated"
+			}, {	
+				"EmailId": "30",
+				"Ability": "Available",
+				"MMSID": "MMS_30",
+				"Status": "Approved",
+				"SentOn":"24.03.2021",
+				"ApprovedOn":"14.03.2021",
+				"Validity": "actual"
+				
+			}, {
+				"EmailId": "40",
+				"Ability": "Not available",
+				"MMSID": "MMS_40",
+				"Status": "Prepared",
+				"CreatedOn":"04.03.2021",
+				"ApprovedOn":"not approved",
+				"Validity": "actual"
+			}, {
+				"EmailId": "50",
+				"Ability": "Yes",
+				"MMSID": "MMS_50",
+				"Status": "Sent",
+				"SentOn":"04.03.2021",
+				"ApprovedOn":"not approved",
+				"Validity": "actual"
+			}, {
+				"EmailId": "50",
+				"Ability": "Not available",
+				"MMSID": "MMS_50",
+				"Status": "Prepared",
+				"SentOn":"04.03.2021",
+				"ApprovedOn":"not approved",
+				"Validity": "actual"
+			}, {
+				"EmailId": "60",
+				"Ability": "Available",
+				"MMSID": "MMS_60",
+				"Status": "Approved",
+				"SentOn":"04.03.2021",
+				"ApprovedOn":"Approved",
+				"Validity": "outdated"
+			}]
+}

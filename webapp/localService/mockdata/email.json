@@ -1,0 +1,50 @@
+[{
+	"EmailId": "10",
+	"Ability": "Yes",
+	"MMSID": "MMS_10",
+	"Status": "Sent",
+	"CreatedBy": "Konstantin",
+	"CreatedOn":"04.03.2021"
+}, {
+	"EmailId": "20",
+	"Ability": "No",
+	"MMSID": "MMS_20",
+	"Status": "Approved",
+	"CreatedBy": "Irya",
+	"CreatedOn":"14.03.2021"
+}, {	
+	"EmailId": "30",
+	"Ability": "Yes",
+	"MMSID": "MMS_30",
+	"Status": "Sent",
+	"CreatedBy": "Konstantin",
+	"CreatedOn":"24.03.2021"
+}, {
+	"EmailId": "40",
+	"Ability": "Yes",
+	"MMSID": "MMS_40",
+	"Status": "Sent",
+	"CreatedBy": "Konstantin",
+	"CreatedOn":"04.03.2021"
+}, {
+	"EmailId": "50",
+	"Ability": "Yes",
+	"MMSID": "MMS_50",
+	"Status": "Sent",
+	"CreatedBy": "Iryna",
+	"CreatedOn":"04.03.2021"
+}, {
+	"EmailId": "50",
+	"Ability": "Yes",
+	"MMSID": "MMS_50",
+	"Status": "Sent",
+	"CreatedBy": "Konstantin",
+	"CreatedOn":"04.03.2021"
+}, {
+	"EmailId": "60",
+	"Ability": "No",
+	"MMSID": "MMS_60",
+	"Status": "Approved",
+	"CreatedBy": "Iryna",
+	"CreatedOn":"04.03.2021"
+}]

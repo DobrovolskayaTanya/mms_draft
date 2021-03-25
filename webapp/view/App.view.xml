@@ -1,0 +1,134 @@
+<mvc:View 
+	controllerName="mms_template.controller.App"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:semantic="sap.f.semantic"
+	xmlns:l="sap.ui.layout">
+
+	<semantic:SemanticPage
+		id="page"
+		headerPinnable="false"
+		toggleHeaderOnTitleClick="false"
+		showFooter="true">
+
+		<semantic:titleHeading>
+			<Title
+				text="{i18n>worklistTitle}"
+				level="H2"/>
+		</semantic:titleHeading>
+<!--select=".onQuickFilter"-->
+		<semantic:content>
+				<IconTabBar
+		         id="idIconTabBar"  >
+	 	   
+		<content>
+			<Table
+				id="table"
+				width="auto"
+			    mode="MultiSelect"
+				items="{
+				path: '/EmailsSet',
+					sorter: {
+						path: 'EmailID',
+						descending: false
+					}
+				}">
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title
+							id="tableHeader"
+							text="{i18n>worklistTitle}"
+							level="H3"/>
+						<ToolbarSpacer />
+						<SearchField
+							id="searchField"
+							tooltip="{i18n>worklistSearchTooltip}"
+							search=".onSearch">
+							<layoutData>
+								<OverflowToolbarLayoutData
+									maxWidth="200px"
+									priority="NeverOverflow"/>
+							</layoutData>
+						</SearchField>
+					</OverflowToolbar>
+				</headerToolbar>
+
+				<columns>
+					<Column id="emailId"
+					width="15em">
+						<Text text="Email Id"/>
+					</Column>
+					<Column 
+					    width="10em"
+						id="mmsId"
+						demandPopin="true"
+						>
+						<Text text="MMS Id"/>
+					</Column>
+					<Column 
+						id="status"
+						demandPopin="true"
+						width="15em">
+						<Text text="Tencent status"/>
+					</Column>
+					<Column id="createdOn"
+						demandPopin="false"
+					width="15em">
+						<Text text="Sent on"/>
+					</Column>
+					<Column id="approvedOn"
+						demandPopin="false"
+						width="15em">
+						<Text text="Approved on"/>
+					</Column>
+					<Column id="validity"
+						demandPopin="false"
+						width="10em">
+						<Text text="Validity"/>
+					</Column>
+
+					
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ObjectIdentifier
+								title="{EmailId}"
+								text="{Ability}"/>
+							<Text
+								text="{MMSID}" />
+							<Text
+								text="{Status}"  />
+							<Text
+								text="{SentOn}" />
+							<Text
+								text="{ApprovedOn}"  />
+							<Text
+								text="{Validity}" />
+							
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+			
+		
+	</IconTabBar>
+			
+	</semantic:content>
+
+	 <semantic:positiveAction>
+		  <semantic:PositiveAction text="{i18n>saveTemplate}" press=".onSaveTemplate"/>
+	 </semantic:positiveAction>
+	 <semantic:negativeAction>
+		  <semantic:NegativeAction text="{i18n>checkStatus}" press=".onCheckStatus"/>
+	 </semantic:negativeAction>
+	 
+	 
+   
+
+	</semantic:SemanticPage>
+
+
+
+</mvc:View>
