@@ -14,45 +14,39 @@ sap.ui.define([
 				"EmailsSet":
 						[{
 							"EmailId": "10",
+							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
 							"Ability": "Not available",
 							"MMSID": "Unknown",
 							"Status": "Unknown",
-							"SentOn":"not sent",
-							"ApprovedOn":"not approved",
-							"Validity": "No"
+							"SentOn":"not sent"
 						}, {
 							"EmailId": "20",
+							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
 							"Ability": "Available",
 							"MMSID": "MMS_20",
 							"Status": "sent",
-							"SentOn":"14.03.2021",
-							"ApprovedOn":"not approved",
-							"Validity": "No"
+							"SentOn":"14.03.2021"
 						}, {	
 							"EmailId": "30",
+							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
 							"Ability": "Available",
 							"MMSID": "MMS_30",
 							"Status": "Approved",
-							"SentOn":"04.03.2021",
-							"ApprovedOn":"14.03.2021",
-							"Validity": "Ok"
-							
+							"SentOn":"04.03.2021"
 						},{
 							"EmailId": "50",
 							"Ability": "Available",
+							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
 							"MMSID": "MMS_50",
 							"Status": "Sent",
-							"SentOn":"04.03.2021",
-							"ApprovedOn":"not approved",
-							"Validity": "No"
+							"SentOn":"04.03.2021"
 						},  {
 							"EmailId": "60",
 							"Ability": "Available",
+							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
 							"MMSID": "MMS_60",
 							"Status": "Approved",
-							"SentOn":"04.02.2021",
-							"ApprovedOn":"24.02.2021",
-							"Validity": "outdated"
+							"SentOn":"04.02.2021"
 						}]
 			});
 
@@ -77,12 +71,22 @@ sap.ui.define([
 			
 		},
 		/**
+		 * Event handler for the Check status button. Will call CBO to get 
+		 * actual Tencent status (from Sent to Aprooved) and update UI
+		 * @public
+		 */
+		onCheckSAbility:function(){
+			
+		},
+		/**
 		 * Event handler for the Search feild. Will seach data by Email ID
 		 * @public
 		 */
 		onSearch: function(oEvent){
 			
 		}
+		
+		
 	
 	
 	/*  Quick search by status 

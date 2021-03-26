@@ -7,7 +7,7 @@
 
 	<semantic:SemanticPage
 		id="page"
-		headerPinnable="false"
+		headerPinnable="true"
 		toggleHeaderOnTitleClick="false"
 		showFooter="true">
 
@@ -15,17 +15,20 @@
 			<Title
 				text="{i18n>worklistTitle}"
 				level="H2"/>
+				
 		</semantic:titleHeading>
 <!--select=".onQuickFilter"-->
+
 		<semantic:content>
 				<IconTabBar
 		         id="idIconTabBar"  >
-	 	   
-		<content>
+							<content>
 			<Table
 				id="table"
 				width="auto"
 			    mode="MultiSelect"
+			    growing="true"
+				growingScrollToLoad="true"
 				items="{
 				path: '/EmailsSet',
 					sorter: {
@@ -39,6 +42,7 @@
 							id="tableHeader"
 							text="{i18n>worklistTitle}"
 							level="H3"/>
+					
 						<ToolbarSpacer />
 						<SearchField
 							id="searchField"
@@ -50,25 +54,31 @@
 									priority="NeverOverflow"/>
 							</layoutData>
 						</SearchField>
+							<Button text="{i18n>checkAbility}" press=".onCheckAbility" />
 					</OverflowToolbar>
 				</headerToolbar>
 
 				<columns>
 					<Column id="emailId"
-					width="15em">
-						<Text text="Email Id"/>
+					width="25em">
+						<Text text="Email"/>
+					</Column>
+						<Column id="ability"
+						demandPopin="false"
+						width="8em">
+						<Text text="Available for Template"/>
 					</Column>
 					<Column 
-					    width="10em"
+					    width="15em"
 						id="mmsId"
 						demandPopin="true"
 						>
-						<Text text="MMS Id"/>
+						<Text text="Tenсent MMS Template ID"/>
 					</Column>
 					<Column 
 						id="status"
 						demandPopin="true"
-						width="15em">
+						width="20em">
 						<Text text="Tencent status"/>
 					</Column>
 					<Column id="createdOn"
@@ -76,36 +86,23 @@
 					width="15em">
 						<Text text="Sent on"/>
 					</Column>
-					<Column id="approvedOn"
-						demandPopin="false"
-						width="15em">
-						<Text text="Approved on"/>
-					</Column>
-					<Column id="validity"
-						demandPopin="false"
-						width="10em">
-						<Text text="Validity"/>
-					</Column>
-
 					
+				
 				</columns>
 				<items>
 					<ColumnListItem>
 						<cells>
 							<ObjectIdentifier
-								title="{EmailId}"
-								text="{Ability}"/>
+								title="{EmailName}"
+								text="{EmailId}"/>
+							<Text
+								text="{Ability}" />
 							<Text
 								text="{MMSID}" />
 							<Text
 								text="{Status}"  />
 							<Text
 								text="{SentOn}" />
-							<Text
-								text="{ApprovedOn}"  />
-							<Text
-								text="{Validity}" />
-							
 						</cells>
 					</ColumnListItem>
 				</items>
@@ -124,8 +121,14 @@
 		  <semantic:NegativeAction text="{i18n>checkStatus}" press=".onCheckStatus"/>
 	 </semantic:negativeAction>
 	 
+		<!-- Custom Footer Content-->
+		<semantic:footerCustomActions>
+			<Button text="Save" />
+			<Button text="Cancel" />
+		</semantic:footerCustomActions>
 	 
-   
+	 
+	
 
 	</semantic:SemanticPage>
 
