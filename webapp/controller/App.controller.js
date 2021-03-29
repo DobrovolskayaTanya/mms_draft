@@ -148,25 +148,14 @@ sap.ui.define([
 		 * @public
 		 */
 		onSearchMessages: function(oEvent){
-	       	// build filter array
+	       
 	       	var oBinding = this.byId("table").getBinding("items");
-
-          //  var searchStr = this.byId("searchField").getValue();
-            
 			var aFilter = [];
 			var sQuery = oEvent.getParameter("query");
 			if (sQuery) {
-				aFilter.push(new sap.ui.model.Filter("EmailId", sap.ui.model.FilterOperator.Contains, sQuery));
+				aFilter.push(new sap.ui.model.Filter("EmailId", sap.ui.model.FilterOperator.EQ, sQuery));
 			}
-
-			// filter binding
-			/*
-			var oList = this.byId("table");
-			var oBinding = oList.getBinding("items");
-			*/
 			oBinding.filter(aFilter,"Application");
-		    
-			
 		},
 		
 		

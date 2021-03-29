@@ -93,10 +93,9 @@
 					<ColumnListItem>
 						<cells>
 							<ObjectIdentifier
-								title="{EmailId}"
-								text="{EmailName}"/>
-								<Text
-								text="{Ability}" />
+								title="{EmailName}"
+								text="{EmailId}"/>
+								
 							<Text
 								text="{Ability}" />
 							<Text
