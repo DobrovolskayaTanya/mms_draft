@@ -1,6 +1,14 @@
 {
   "welcomeFile": "/webapp/index.html",
   "routes": [
+  	{
+		"path": "/API_MKT_CAMPAIGN_MESSAGE_SRV",
+		"target": {
+			"type": "destination",
+			"name": "API_MKT_CAMPAIGN_MESSAGE_SRV"
+		},
+		"description": "SMC Campaign Message Content API"
+	},
     {
       "path": "/resources",
       "target": {

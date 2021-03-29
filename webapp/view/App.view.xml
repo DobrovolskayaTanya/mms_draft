@@ -30,7 +30,7 @@
 			    growing="true"
 				growingScrollToLoad="true"
 				items="{
-				path: '/EmailsSet',
+				path: '/messagesSet',
 					sorter: {
 						path: 'EmailID',
 						descending: false
@@ -47,7 +47,7 @@
 						<SearchField
 							id="searchField"
 							tooltip="{i18n>worklistSearchTooltip}"
-							search=".onSearch">
+							search=".onSearchMessages">
 							<layoutData>
 								<OverflowToolbarLayoutData
 									maxWidth="200px"
@@ -93,8 +93,10 @@
 					<ColumnListItem>
 						<cells>
 							<ObjectIdentifier
-								title="{EmailName}"
-								text="{EmailId}"/>
+								title="{EmailId}"
+								text="{EmailName}"/>
+								<Text
+								text="{Ability}" />
 							<Text
 								text="{Ability}" />
 							<Text

@@ -1,17 +1,31 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/model/json/JSONModel",
-	"sap/ui/model/Filter"
-], function (Controller,JSONModel,Filter) {
+	"sap/m/MessageToast",
+//	"sap/ui/model/json/JSONModel",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator"
+], function (Controller,  Filter, MessageToast, FilterOperator ) {
 	"use strict";
-
-	return Controller.extend("mms_template.controller.View1", {
 	
+	var defaultSearchParam = "Search by Message ID";
+	
+	var messagesModel = new sap.ui.model.json.JSONModel();
+	
+	var messagesResults = [];
+	var statusesResults = [];
+	var mappedResults = [];
+
+	return Controller.extend("mms_template.controller.App", {
+
 		onInit: function () {
-		var emailModel =new JSONModel();
-		
-		emailModel.setData({
-				"EmailsSet":
+	    
+		this.getView().setModel(messagesModel);		//setting main model
+		this.loadMessages();
+			
+		//var messagesModel =new JSONModel();
+		/* Test data
+		messagesModel.setData({
+				"messagesSet":
 						[{
 							"EmailId": "10",
 							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
@@ -51,8 +65,58 @@ sap.ui.define([
 			});
 
 	//	emailModel.loadData("model/email.json");
-	    this.getView().setModel(emailModel);
+	*/
 	},
+		loadMessages: function(){
+			var oView = this.getView();
+			oView.setBusy(true);
+			var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/Messages/";
+			var oParams ={
+				$format: "json",
+				$top: "20",
+				$orderby: "LastChangeDateTime desc",
+				$filter: "MessageTypeName eq 'Email'",
+				$inlinecount: "allpages"
+			};
+			var self = this;
+			
+			$.get(sUrl,oParams)
+				.done(function(results){
+					oView.setBusy(false);
+					self._mapResults(results);
+					
+				})
+				.fail(function(err){
+					oView.setBusy(false);
+					if(err !== undefined){
+						var oErrorResponse =$.parseJSON(err.responseText);
+						sap.m.MessageToast.show(oErrorResponse.message, {
+							duration: 6000
+						});
+					} else {
+						sap.m.MessageToast.show("Unknown error!");
+					}
+				});
+		},
+		/**
+		 * Function for mapping messages from API_MKT_CAMPAIGN_MESSAGE_SRV
+		 * and statuses from CBO
+		 * @private
+		 */
+		_mapResults: function(results){
+			var oModel = this.getView().getModel();
+			for(var i = 0; i < results.d.results.length; i++){
+				var MessageUUID = results.d.results[i].MessageUUID,
+				EmailId = results.d.results[i].Message,
+				EmailName = results.d.results[i].MessageName;
+				
+			messagesResults.push({
+				EmailId: EmailId,
+				EmailName: EmailName,
+				});	
+			}
+		oModel.setProperty("/messagesSet",messagesResults);
+		},
 		/**
 		 * Event handler for the Save template button. Will send the
 		 * email content to CPI and change Tencent status to initil
@@ -62,6 +126,7 @@ sap.ui.define([
 		onSaveTemplate: function(){
 			
 		},
+	
 		/**
 		 * Event handler for the Check status button. Will call CBO to get 
 		 * actual Tencent status (from Sent to Aprooved) and update UI
@@ -82,12 +147,29 @@ sap.ui.define([
 		 * Event handler for the Search feild. Will seach data by Email ID
 		 * @public
 		 */
-		onSearch: function(oEvent){
+		onSearchMessages: function(oEvent){
+	       	// build filter array
+	       	var oBinding = this.byId("table").getBinding("items");
+
+          //  var searchStr = this.byId("searchField").getValue();
+            
+			var aFilter = [];
+			var sQuery = oEvent.getParameter("query");
+			if (sQuery) {
+				aFilter.push(new sap.ui.model.Filter("EmailId", sap.ui.model.FilterOperator.Contains, sQuery));
+			}
+
+			// filter binding
+			/*
+			var oList = this.byId("table");
+			var oBinding = oList.getBinding("items");
+			*/
+			oBinding.filter(aFilter,"Application");
+		    
 			
-		}
+		},
 		
 		
-	
 	
 	/*  Quick search by status 
 		_mFilters: {
