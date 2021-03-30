@@ -22,13 +22,15 @@
 		<semantic:content>
 				<IconTabBar
 		         id="idIconTabBar"  >
-							<content>
+			<content>
 			<Table
 				id="table"
 				width="auto"
 			    mode="MultiSelect"
 			    growing="true"
-				growingScrollToLoad="true"
+				growingScrollToLoad="false"
+				growingThreshold="25"
+				
 				items="{
 				path: '/messagesSet',
 					sorter: {
@@ -50,7 +52,7 @@
 							search=".onSearchMessages">
 							<layoutData>
 								<OverflowToolbarLayoutData
-									maxWidth="200px"
+									maxWidth="250px"
 									priority="NeverOverflow"/>
 							</layoutData>
 						</SearchField>
@@ -69,7 +71,7 @@
 						<Text text="Available for Template"/>
 					</Column>
 					<Column 
-					    width="15em"
+					    width="10em"
 						id="mmsId"
 						demandPopin="true"
 						>

@@ -73,8 +73,8 @@ sap.ui.define([
 			var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/Messages/";
 			var oParams ={
 				$format: "json",
-				$top: "20",
-				$orderby: "LastChangeDateTime desc",
+				$top: "100",
+				$orderby: "Message desc",
 				$filter: "MessageTypeName eq 'Email'",
 				$inlinecount: "allpages"
 			};
@@ -118,7 +118,7 @@ sap.ui.define([
 				Ability: false,
 		 		MMSID: "unknown",
 		 		Status: "unknown",
-		 		SentOn:"unknown"
+		 		SentOn:"not sent"
 				});	
 			}
 			
