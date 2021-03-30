@@ -12,7 +12,7 @@ sap.ui.define([
 	var messagesModel = new sap.ui.model.json.JSONModel();
 	
 	var messagesResults = [];
-	var statusesResults = [];
+	var templatesResults = [];
 	var mappedResults = [];
 
 	return Controller.extend("mms_template.controller.App", {
@@ -100,23 +100,93 @@ sap.ui.define([
 		},
 		/**
 		 * Function for mapping messages from API_MKT_CAMPAIGN_MESSAGE_SRV
-		 * and statuses from CBO
+		 * and information from CBO
 		 * @private
 		 */
 		_mapResults: function(results){
 			var oModel = this.getView().getModel();
+			templatesResults = this._getTemplateInfo();
 			for(var i = 0; i < results.d.results.length; i++){
 				var MessageUUID = results.d.results[i].MessageUUID,
 				EmailId = results.d.results[i].Message,
 				EmailName = results.d.results[i].MessageName;
 				
 			messagesResults.push({
+				MessageUUID: MessageUUID,
 				EmailId: EmailId,
 				EmailName: EmailName,
+				Ability: false,
+		 		MMSID: "unknown",
+		 		Status: "unknown",
+		 		SentOn:"unknown"
 				});	
 			}
-		oModel.setProperty("/messagesSet",messagesResults);
+			
+		mappedResults = messagesResults.map(x => Object.assign(x, templatesResults.find(y => y.MessageUUID == x.MessageUUID)));	
+	//	console.log(mappedResults);	
+		oModel.setProperty("/messagesSet",mappedResults);
 		},
+		/**
+		 * Function to get template information from CBO for messages
+		 *  @private
+		 */
+		 _getTemplateInfo: function(){
+		 //	var templates = [];
+		 	var	templates  = [{
+		 		MessageUUID: "42010a05-507a-1eeb-a3c4-fcc321784c86",
+		 		MessageID: 625,
+		 		Ability: true,
+		 		MMSID: 11,
+		 		Status: "sent",
+		 		SentOn: new Date()
+		 	},
+		 	{
+		 		MessageUUID: "42010a05-507a-1edb-a38e-97e59fa0bdaa",
+		 		MessageID: 623,
+		 		Ability: true,
+		 		MMSID: 12,
+		 		Status: "approved",
+		 		SentOn: new Date()
+		 	}];
+		 	// for test purposes sample data
+		 
+		 /* to be decelop when CBO is created
+		 	var oView =this.getView();
+		 	oView.setBusy(true);
+		 	
+		 	var sUrl = "CBO_API";
+		 	var self =this;
+		 	
+		 	var oSettings ={
+		 		"url": sUrl,
+				"method": "GET",
+				"dataType": "json",
+				"async": false,
+				"contentType": "application/json"
+		 	};
+		 	
+		 	$.ajax(oSettings)
+		 		.done(function(results){
+		 			oView.setBusy(false);
+		 			templates = results.results;    // array of records from CBO to confirm path
+		 		})
+		 		.fail(function(err){
+		 			oView.setBusy(false);
+		 			if (err !== undefined) {
+						var oErrorResponse = $.parseJSON(err.responseText);
+						sap.m.MessageToast.show(oErrorResponse.message, {
+							duration: 6000
+						});
+					} else {
+						sap.m.MessageToast.show("Unknown error!");
+					}
+		 		});
+		 		*/
+		 		return templates;
+		 },
+		
+		
+		
 		/**
 		 * Event handler for the Save template button. Will send the
 		 * email content to CPI and change Tencent status to initil
@@ -160,20 +230,7 @@ sap.ui.define([
 		
 		
 	
-	/*  Quick search by status 
-		_mFilters: {
-			Cheap: [new Filter("Price", "LT", 100)],
-			Moderate: [new Filter("Price", "BT", 100, 1000)],
-			Expensive: [new Filter("Price", "GT", 1000)]
-		},
-		onQuickFilter: function (oEvent) {
-			var sKey = oEvent.getParameter("key");
-			var oFilter = this._mFilters[sKey];
-			var oBinding = this._oTable.getBinding("items");
 
-			oBinding.filter(oFilter);
-		}
-		*/
 	});
 
 });
