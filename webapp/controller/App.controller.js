@@ -7,7 +7,8 @@ sap.ui.define([
 ], function (Controller,  Filter, MessageToast, FilterOperator ) {
 	"use strict";
 	
-	var defaultSearchParam = "Search by Message ID";
+	var countMessages,
+		countLoaded = 100;
 	
 	var messagesModel = new sap.ui.model.json.JSONModel();
 	
@@ -80,11 +81,12 @@ sap.ui.define([
 			};
 			var self = this;
 			
-			$.get(sUrl,oParams)
+			$.get(sUrl, oParams)
 				.done(function(results){
 					oView.setBusy(false);
 					self._mapResults(results);
-					
+					countMessages = results.d.__count;
+					self.getView().getModel().setProperty("/countMessages", countMessages);
 				})
 				.fail(function(err){
 					oView.setBusy(false);
@@ -98,6 +100,7 @@ sap.ui.define([
 					}
 				});
 		},
+		
 		/**
 		 * Function for mapping messages from API_MKT_CAMPAIGN_MESSAGE_SRV
 		 * and information from CBO
@@ -145,7 +148,7 @@ sap.ui.define([
 		 		MessageID: 623,
 		 		Ability: true,
 		 		MMSID: 12,
-		 		Status: "approved",
+		 		Status: "Provider1 OK, Provider2 NO, Provider3 OK",
 		 		SentOn: new Date()
 		 	}];
 		 	// for test purposes sample data

@@ -11,12 +11,6 @@
 		toggleHeaderOnTitleClick="false"
 		showFooter="true">
 
-		<semantic:titleHeading>
-			<Title
-				text="{i18n>worklistTitle}"
-				level="H2"/>
-				
-		</semantic:titleHeading>
 <!--select=".onQuickFilter"-->
 
 		<semantic:content>
@@ -29,7 +23,7 @@
 			    mode="MultiSelect"
 			    growing="true"
 				growingScrollToLoad="false"
-				growingThreshold="25"
+				growingThreshold="20"
 				
 				items="{
 				path: '/messagesSet',
@@ -42,7 +36,7 @@
 					<OverflowToolbar>
 						<Title
 							id="tableHeader"
-							text="{i18n>worklistTitle}"
+							text="{i18n>worklistTitle} ({/countMessages})"
 							level="H3"/>
 					
 						<ToolbarSpacer />
@@ -56,7 +50,7 @@
 									priority="NeverOverflow"/>
 							</layoutData>
 						</SearchField>
-							<Button text="{i18n>checkAbility}" press=".onCheckAbility" />
+							
 					</OverflowToolbar>
 				</headerToolbar>
 
@@ -105,7 +99,8 @@
 							<Text
 								text="{Status}"  />
 							<Text
-								text="{SentOn}" />
+								text="{SentOn}"  />
+								
 						</cells>
 					</ColumnListItem>
 				</items>
@@ -117,17 +112,12 @@
 			
 	</semantic:content>
 
-	 <semantic:positiveAction>
-		  <semantic:PositiveAction text="{i18n>saveTemplate}" press=".onSaveTemplate"/>
-	 </semantic:positiveAction>
-	 <semantic:negativeAction>
-		  <semantic:NegativeAction text="{i18n>checkStatus}" press=".onCheckStatus"/>
-	 </semantic:negativeAction>
 	 
 		<!-- Custom Footer Content-->
 		<semantic:footerCustomActions>
-			<Button text="Save" />
-			<Button text="Cancel" />
+			<Button text="{i18n>checkAbility}" press=".onCheckAbility" class="sapUiTinyMarginBeginEnd" type="Emphasized"  icon="sap-icon://accept"/>
+			<Button text="{i18n>saveTemplate}" press=".onSaveTemplate"	class="sapUiTinyMarginBeginEnd" type="Emphasized" icon="sap-icon://action" />
+			<Button text="{i18n>checkStatus}" press=".onCheckStatus" class="sapUiTinyMarginBeginEnd" type="Emphasized" icon="sap-icon://cause" />
 		</semantic:footerCustomActions>
 	 
 	 
