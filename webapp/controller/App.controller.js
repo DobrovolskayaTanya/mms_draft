@@ -124,8 +124,8 @@ sap.ui.define([
 		 		SentOn:"not sent"
 				});	
 			}
-			
-		mappedResults = messagesResults.map(x => Object.assign(x, templatesResults.find(y => y.MessageUUID == x.MessageUUID)));	
+	    // create transorm array templatesResults to have the first
+		mappedResults = messagesResults.map(x => Object.assign(x, templatesResults.find(y => y.MessageUUID === x.MessageUUID)));	
 	//	console.log(mappedResults);	
 		oModel.setProperty("/messagesSet",mappedResults);
 		},
@@ -134,7 +134,11 @@ sap.ui.define([
 		 *  @private
 		 */
 		 _getTemplateInfo: function(){
-		 //	var templates = [];
+		 	var templates = [];
+		 	var	resultTemplates = [];
+		 	const keys = ["MessageUUID","MessageID","AbilityforTemplate","TencentID","TencentStatus","SentDate"];
+		 	
+		 	/*
 		 	var	templates  = [{
 		 		MessageUUID: "42010a05-507a-1eeb-a3c4-fcc321784c86",
 		 		MessageID: 625,
@@ -151,27 +155,27 @@ sap.ui.define([
 		 		Status: "Provider1 OK, Provider2 NO, Provider3 OK",
 		 		SentOn: new Date()
 		 	}];
+		 	*/
 		 	// for test purposes sample data
 		 
-		 /* to be decelop when CBO is created
+		//  to be deveelop when CBO is created
 		 	var oView =this.getView();
 		 	oView.setBusy(true);
 		 	
-		 	var sUrl = "CBO_API";
+		 	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
 		 	var self =this;
-		 	
-		 	var oSettings ={
-		 		"url": sUrl,
+		 
+		 	var oSettings = {
+				"url": sUrl,
 				"method": "GET",
 				"dataType": "json",
 				"async": false,
 				"contentType": "application/json"
-		 	};
-		 	
+			};
 		 	$.ajax(oSettings)
 		 		.done(function(results){
 		 			oView.setBusy(false);
-		 			templates = results.results;    // array of records from CBO to confirm path
+		 			resultTemplates = results.d.results;    // array of records from CBO to confirm path
 		 		})
 		 		.fail(function(err){
 		 			oView.setBusy(false);
@@ -184,7 +188,30 @@ sap.ui.define([
 						sap.m.MessageToast.show("Unknown error!");
 					}
 		 		});
-		 		*/
+		 		
+		 	for(var i = 0; i < resultTemplates.length; i++){
+		 	    var MessageUUID = resultTemplates[i].MessageUUID,
+		 	    MessageID = resultTemplates[i].MessageID,
+		 	    AbilityforTemplate = resultTemplates[i].AbilityforTemplate,
+		 	    TencentID = resultTemplates[i].TencentID,
+		 	    TencentStatus = resultTemplates[i].TencentStatus,
+		 	    SentDate = resultTemplates[i].SentDate;
+		 	    
+		 	    templates.push({
+		 	    	MessageUUID: MessageUUID,
+					EmailId: MessageID,
+					Ability: AbilityforTemplate,
+			 		MMSID: TencentID,
+			 		Status: TencentStatus,
+			 		SentOn: SentDate
+		 	    });
+		 	}
+		 	/* properties in object  in the wrong order. Try use Map???
+		 	for(var i = 0; i < resultTemplates.length; i++){
+		 	    let templ =  Object.entries(resultTemplates[i]).filter(([key,value])=>keys.includes(key));
+		 	    templates.push(Object.fromEntries(templ));
+		 	}
+		 	*/
 		 		return templates;
 		 },
 		

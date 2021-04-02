@@ -9,6 +9,14 @@
 		},
 		"description": "SMC Campaign Message Content API"
 	},
+	{
+		"path": "/YY1_TENCENT_TEMPLATE_CDS",
+		"target": {
+			"type": "destination",
+			"name": "YY1_TENCENT_TEMPLATE_CDS"
+		},
+		"description": "Tencent template statuses CBO"
+	},
     {
       "path": "/resources",
       "target": {
