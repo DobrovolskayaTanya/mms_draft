@@ -121,8 +121,8 @@ sap.ui.define([
 				EmailName: EmailName,
 				Ability: "unknown",
 		 		MMSID: "unknown",
-		 		Status: "unknown",
-		 		SentOn:"not sent"
+		 		Status: "unknown"
+		 //		SentOn:"not sent"
 				});	
 			}
 	    // create transorm array templatesResults to have the first
@@ -196,15 +196,15 @@ sap.ui.define([
 		 	    AbilityforTemplate = resultTemplates[i].AbilityforTemplate,
 		 	    TencentID = resultTemplates[i].TencentID,
 		 	    TencentStatus = resultTemplates[i].TencentStatus,
-		 	    SentDate = resultTemplates[i].SentDate;
+		 	    SentDate = this._formatDateValue(resultTemplates[i].SentDate);
 		 	    
-		 	    templates.push({
+		     templates.push({
 		 	    	MessageUUID: MessageUUID,
 					EmailId: MessageID,
 					Ability: AbilityforTemplate,
 			 		MMSID: TencentID,
 			 		Status: TencentStatus,
-			 		SentOn: SentDate
+			 		SentOn: new Date(SentDate)
 		 	    });
 		 	}
 		 	/* properties in object  in the wrong order. Try use Map???
@@ -215,8 +215,19 @@ sap.ui.define([
 		 	*/
 		 		return templates;
 		 },
+		/**
+		 * Function to format date  from CBO for UI
+	 	*/
+		_formatDateValue: function (sDate) {
+			if (sDate) {
+				var oDate = sDate.slice(6, sDate.length - 2);
+			return Number(oDate);
 		
-		
+			} else {
+				return null;
+			}
+		},
+ 
 		
 		/**
 		 * Event handler for the Save template button. Will send the

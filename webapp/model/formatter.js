@@ -1,6 +1,7 @@
 sap.ui.define([], function () {
 	"use strict";
 	return {
+		
 		abilityStatus: function (sStatus) {
 			var resourceBundle = this.getView().getModel("i18n").getResourceBundle();
 			switch (sStatus) {
@@ -12,5 +13,6 @@ sap.ui.define([], function () {
 					return sStatus;
 			}
 		}
+	
 	};
 });

@@ -101,12 +101,17 @@
 								text="{MMSID}" />
 							<Text
 								text="{Status}"  />
-							<Text
+						
+							<ObjectStatus
 								text="{
-								path: 'SentOn'
-								}"  />
-								
-						</cells>
+								path: 'SentOn',
+								type: 'sap.ui.model.type.DateTime',
+								formatOptions: {  
+								     pattern: 'dd/MM/yyyy'  
+								   }
+								}" 
+								state="None"/>
+					</cells>
 					</ColumnListItem>
 				</items>
 			</Table>
