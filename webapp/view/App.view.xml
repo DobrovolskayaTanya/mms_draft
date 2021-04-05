@@ -91,15 +91,20 @@
 							<ObjectIdentifier
 								title="{EmailName}"
 								text="{EmailId}"/>
-								
-							<Text
-								text="{Ability}" />
+							<ObjectStatus
+								text = "{
+								path: 'Ability',
+								formatter: '.formatter.abilityStatus'
+							    }"
+							    state ="{=	${Ability} === '1' ? 'Success'  : 'Error'}"/>
 							<Text
 								text="{MMSID}" />
 							<Text
 								text="{Status}"  />
 							<Text
-								text="{SentOn}"  />
+								text="{
+								path: 'SentOn'
+								}"  />
 								
 						</cells>
 					</ColumnListItem>

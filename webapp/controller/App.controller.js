@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/m/MessageToast",
 //	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
-	"sap/ui/model/FilterOperator"
-], function (Controller,  Filter, MessageToast, FilterOperator ) {
+	"sap/ui/model/FilterOperator",
+	"../model/formatter"
+], function (Controller,  Filter, MessageToast, FilterOperator, formatter  ) {
 	"use strict";
 	
 	var countMessages,
@@ -17,7 +18,7 @@ sap.ui.define([
 	var mappedResults = [];
 
 	return Controller.extend("mms_template.controller.App", {
-
+		formatter: formatter,
 		onInit: function () {
 	    
 		this.getView().setModel(messagesModel);		//setting main model
@@ -118,7 +119,7 @@ sap.ui.define([
 				MessageUUID: MessageUUID,
 				EmailId: EmailId,
 				EmailName: EmailName,
-				Ability: false,
+				Ability: "unknown",
 		 		MMSID: "unknown",
 		 		Status: "unknown",
 		 		SentOn:"not sent"
@@ -136,7 +137,7 @@ sap.ui.define([
 		 _getTemplateInfo: function(){
 		 	var templates = [];
 		 	var	resultTemplates = [];
-		 	const keys = ["MessageUUID","MessageID","AbilityforTemplate","TencentID","TencentStatus","SentDate"];
+		// 	const keys = ["MessageUUID","MessageID","AbilityforTemplate","TencentID","TencentStatus","SentDate"];
 		 	
 		 	/*
 		 	var	templates  = [{
