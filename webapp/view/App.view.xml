@@ -56,7 +56,7 @@
 
 				<columns>
 					<Column id="emailId"
-					width="25em">
+					width="30em">
 						<Text text="Email"/>
 					</Column>
 						<Column id="ability"
@@ -74,12 +74,12 @@
 					<Column 
 						id="status"
 						demandPopin="true"
-						width="20em">
+						width="25em">
 						<Text text="Tencent status"/>
 					</Column>
 					<Column id="createdOn"
 						demandPopin="false"
-					width="15em">
+					width="12em">
 						<Text text="Sent on"/>
 					</Column>
 					

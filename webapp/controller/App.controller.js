@@ -69,6 +69,10 @@ sap.ui.define([
 	//	emailModel.loadData("model/email.json");
 	*/
 	},
+		/*
+			SAP Marketing allows to retrieve maximum of 100 messages per call.
+			Therefore, the app is loading top 100 messages and then proceeds on calling next 100 if there are > 100 messages, and so on.
+		*/
 		loadMessages: function(){
 			var oView = this.getView();
 			oView.setBusy(true);
@@ -88,20 +92,58 @@ sap.ui.define([
 					self._mapResults(results);
 					countMessages = results.d.__count;
 					self.getView().getModel().setProperty("/countMessages", countMessages);
+					
+					var loadBatches = countMessages/countLoaded;
+					for(var j = 1; j<loadBatches; j++){
+						self._loadMessagesAdd(j);
+					}
 				})
 				.fail(function(err){
 					oView.setBusy(false);
 					if(err !== undefined){
-						var oErrorResponse =$.parseJSON(err.responseText);
-						sap.m.MessageToast.show(oErrorResponse.message, {
-							duration: 6000
+						var oErrorResponse = err.responseText;
+						sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+							duration: 7000,
+							width:"20em"
 						});
 					} else {
-						sap.m.MessageToast.show("Unknown error!");
+						sap.m.MessageToast.show("Unknown error. Turn to the support team!");
 					}
 				});
 		},
+		/**
+		 * Function which is called to load all messages if their number > 100
+		 * */
 		
+		_loadMessagesAdd: function(iteration){
+			 var oView  = this.getView();
+			 oView.setBusy(true);
+			 var self = this;
+			 
+			 $.ajax({
+			 	url: "/API_MKT_CAMPAIGN_MESSAGE_SRV/Messages/?%24format=json&%24skip=" + countLoaded * iteration +
+					"&%24top=100&%24orderby=LastChangeDateTime+desc&%24filter=MessageTypeName+eq+%27Email%27&%24inlinecount=allpages",
+				type: "get",
+				async: false,
+				success: function(results){
+					oView.setBusy(false);
+					self._mapResults(results);
+				},
+				error: function(){
+					oView.setBusy(false);
+					if (err !== undefined) {
+						var oErrorResponse = err.responseText;
+						sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+							duration: 7000,
+							width:"20em"
+						});
+					} else {
+						sap.m.MessageToast.show("Unknown error. Turn to the support team!");
+					}
+				  }
+			   });
+			 },
+			 
 		/**
 		 * Function for mapping messages from API_MKT_CAMPAIGN_MESSAGE_SRV
 		 * and information from CBO
@@ -181,12 +223,13 @@ sap.ui.define([
 		 		.fail(function(err){
 		 			oView.setBusy(false);
 		 			if (err !== undefined) {
-						var oErrorResponse = $.parseJSON(err.responseText);
-						sap.m.MessageToast.show(oErrorResponse.message, {
-							duration: 6000
+						var oErrorResponse = err.responseText;
+						sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+							duration: 7000,
+							width:"20em"
 						});
 					} else {
-						sap.m.MessageToast.show("Unknown error!");
+						sap.m.MessageToast.show("Unknown error. Turn to the support team!");
 					}
 		 		});
 		 		
