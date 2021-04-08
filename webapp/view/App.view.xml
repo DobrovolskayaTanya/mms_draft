@@ -50,7 +50,11 @@
 									priority="NeverOverflow"/>
 							</layoutData>
 						</SearchField>
-							
+						<Button
+							id="sortUsersButton"
+							press="onSort"
+							tooltip="{i18n>sortButtonText}"
+							icon="sap-icon://sort"/>		
 					</OverflowToolbar>
 				</headerToolbar>
 

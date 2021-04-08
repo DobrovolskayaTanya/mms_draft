@@ -9,21 +9,26 @@ sap.ui.define([
 	"use strict";
 	
 	var countMessages,
-		countLoaded = 100;
+		sMessageUUID = "42010a05-507a-1edb-a2fb-77f58cbad3b1" ,
+		sMessageID = "621",
+	    aTextBlockContentString,
+		countLoaded = 100; 
+	var isTemplateAvailable = false;
 	
 	var messagesModel = new sap.ui.model.json.JSONModel();
 	
 	var messagesResults = [];
 	var templatesResults = [];
 	var mappedResults = [];
-
+	var	aMessageBlocks = [];
+	
 	return Controller.extend("mms_template.controller.App", {
 		formatter: formatter,
 		onInit: function () {
 	    
 		this.getView().setModel(messagesModel);		//setting main model
 		this.loadMessages();
-			
+		this._getMessageStatus();
 		//var messagesModel =new JSONModel();
 		/* Test data
 		messagesModel.setData({
@@ -295,9 +300,234 @@ sap.ui.define([
 		 * actual Tencent status (from Sent to Aprooved) and update UI
 		 * @public
 		 */
-		onCheckSAbility:function(){
+
+		onCheckAbility:function(oEvent){
 			
+			
+			this._getMessageStatus();
+			
+			/*
+			42010a05-507a-1eeb-a5db-0cb08cd25d9d  -  with two images
+			
+			1.  Get GUID from event
+			2. Call /API_MKT_CAMPAIGN_MESSAGE_SRV/Messages(guid'42010a05-507a-1edb-97fc-94e2d6378287')//MessageContents and check MessageStatus 
+			if MessageStatus !== 20(Released) -> NOT Message "Email is not released"
+			else step 3
+			3. Call /API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'42010a05-507a-1edb-97fc-94e2d6378287',LanguageCode='EN')
+			/MessageBlocks
+			and check that contains only One Block Type Text
+			if (False) - > Message "Only one Text is allowed. Check message content"
+			else  - step 4
+			4. Call  /API_MKT_CAMPAIGN_MESSAGE_SRV/Blocks(guid'42010a05-507a-1edb-97fc-9607290d6287')/MessageBlockContents
+			in property "BlockContentHTMLString" -  check that contains only one image or one link.
+			if(False) -> Message "Message can contain only one Image or link. Check the email content"
+			else  -  > Message - can be template. POST to CBO - Availability - 1. 
+			*/
 		},
+		/**
+		 * Function to get Message status
+		 * @private
+		 */
+		 _getMessageStatus: function(){
+		 		var oView = this.getView();
+				var oParams = {
+					$expand: "MessageContents",
+					$format: "json"
+				};
+                
+				//var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/Messages(guid'" + sMessageUUID + "')";
+				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/Messages(guid'" + sMessageUUID + "')";
+				var self = this;
+				
+				$.get(sUrl, oParams)
+					.done(function(results){
+							var sMessageStatus = results.d.MessageStatus;
+							if(sMessageStatus !== "20"){
+								sap.m.MessageToast.show("Email is not released. \n Please, release the email.", {
+								duration: 7000,
+								width:"20em"
+								});
+							} else{
+								// function to count blocks and check their content
+								self._checkBlocksNumberAndContent();
+							
+							}
+						
+					})
+					.fail(function(err){
+							if (err !== undefined) {
+							var oErrorResponse = err.responseText;
+							sap.m.MessageToast.show(" ERROR Description \n" + oErrorResponse, {
+								duration: 7000,
+								width:"20em"
+							});
+						} else {
+							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
+						}
+					});
+		 },
+		/**
+		 * Function to get number and type of blocks in the email
+		 * @private
+		 */
+		 _checkBlocksNumberAndContent: function(){
+		 		var oView = this.getView();
+		 		oView.setBusy(true);
+		 		
+				var oParams = {
+					$format: "json",
+					$expand: "MessageBlockContents"
+				};
+
+				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + sMessageUUID + "',LanguageCode='EN')/MessageBlocks";
+				var self = this;
+				
+				$.get(sUrl,oParams)
+					.done(function(results){
+						oView.setBusy(false);
+						aMessageBlocks = results.d.results;
+						if(aMessageBlocks.length === 2){
+						   // for (var i = 0; aMessageBlocks.length-1; i++){
+						   [0,1].forEach(function(i){
+						    	if(aMessageBlocks[i].BlockType === "TEXT"){
+						    		aTextBlockContentString = aMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
+						    		console.log(aTextBlockContentString, aTextBlockContentString.length);
+						    		if(aTextBlockContentString.length > 1){
+						    		    self._checkContentString(aTextBlockContentString);
+						    		}else{
+						    			sap.m.MessageToast.show("Type of block has to be TEXT", {
+											duration: 7000,
+											width:"20em"
+										});
+						    		}
+						    	}
+						   });
+						   // 	}
+						}else{
+							sap.m.MessageToast.show("Email has to contain only one Text block", {
+							duration: 7000,
+							width:"20em"
+							});
+						}
+					})
+					.fail(function(err){
+						if (err !== undefined) {
+							var oErrorResponse = err.responseText;
+							sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+							});
+						} else {
+							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
+						}
+					});
+		 },
+		 /**
+		 * Function to check if email contains more than 1 image or 1 link
+		 * @private
+		 * Example string
+		 * "Message with empty subject and two images<img src="http://s7g10.scene7.com/is/image/BurberryTest/05C0B8AB-737E-4FFB-8F45-084943E2F96C?$BBY_V2_B_4X3$" alt="77777771_black3P_pt=sl_3P_23.jpg" title="77777771_black3P_pt=sl_3P_23.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142219601539" /><img src="http://s7g10.scene7.com/is/image/BurberryTest/42371C70-DF3E-4A57-99D0-4B83F138C3C4?$BBY_V2_B_4X3$" alt="45533011_black_pt=sl_5.jpg" title="45533011_black_pt=sl_5.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142459331634" />"
+		 */
+		 _checkContentString:function(oContentString){
+		 	const imageStr = "<img";
+		 	const linkStr = "href=";
+		 	let countImage = 0;
+			let countLink = 0;
+		    //find and count occurrences of Image -> Substring <img src=	
+		    countImage = this.countOccurances(oContentString,imageStr);
+		     //find and count occurrences of Link -> Substring href=
+		    countLink = this.countOccurances(oContentString,linkStr);
+		    if(countImage <= 1 && countLink <= 1){
+		    	isTemplateAvailable = true;
+		    	console.log(isTemplateAvailable);
+		    }else{
+		    	sap.m.MessageToast.show(" Email can contain one image or one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
+								duration: 7000
+							});
+		    }
+		    // post Ability status to CBO
+		  	if(isTemplateAvailable){
+				this._sendAbilityStatus("1", "YES");
+			}else{
+				this._sendAbilityStatus("0", "NO");
+			}
+		  },
+		/**
+		 * Function to count occurance of substring in the string
+		 * @private
+		 */
+		 countOccurances: function(oString,oSubString){
+		 	return oString.split(oSubString).length - 1;
+		 },
+		 	/**
+		 * Function to sent ability to be Tencent template status to  CBO
+		 * @private
+		 */
+		 _sendAbilityStatus: function(abilityFlag, postMessage){
+		 		var oView = this.getView();
+		 		oView.setBusy(true);
+		 		
+		 		var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
+				var oSettings = {
+					"url": sUrl,
+					"method": "GET", 
+				 	"headers": {
+						"X-CSRF-Token": "Fetch"
+					},
+					"dataType": "json",
+					"contentType": "application/json"
+				};
+				
+				$.ajax(oSettings)
+				.done(function(results, textStatus, XMLHttpRequest){
+					this.token =XMLHttpRequest.getResponseHeader('X-CSRF-Token');
+				  	var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
+					var oPayload = {
+							 		"MessageUUID": sMessageUUID ,
+							 	    "MessageID": sMessageID,
+					                "AbilityforTemplate": abilityFlag                
+							 	    };
+					var oSettingsToInsert ={
+						"url": sUrlToInsert,
+						"method" : "POST",
+						"headers": {
+							"X-CSRF-Token": this.token
+						},
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data": JSON.stringify(oPayload)
+					};
+						$.ajax(oSettingsToInsert)
+							.done(function(results,textStatus, XMLHttpRequest){
+								oView.setBusy(false);
+								sap.m.MessageToast.show(postMessage, {
+											duration: 1000
+										});
+							})
+							.fail(function(err){
+								if (err !== undefined) {
+									oView.setBusy(false);
+									var oErrorResponse = err.responseText;
+										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+											duration: 6000
+										});
+									} else {
+										sap.m.MessageToast.show("Unknown error!");
+									}
+							});
+					
+				})	
+		 		.fail(function(err){
+						if (err !== undefined) {
+								var oErrorResponse = err.responseText;
+								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+									});
+						} else {
+							sap.m.MessageToast.show("Unknown error!");
+						}
+				});
+		 	
+		 },
 		/**
 		 * Event handler for the Search feild. Will seach data by Email ID
 		 * @public
