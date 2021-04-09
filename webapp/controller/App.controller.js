@@ -4,8 +4,9 @@ sap.ui.define([
 //	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
+	"sap/ui/model/Sorter",
 	"../model/formatter"
-], function (Controller,  Filter, MessageToast, FilterOperator, formatter  ) {
+], function (Controller, MessageToast, Filter, FilterOperator, Sorter, formatter  ) {
 	"use strict";
 	
 	var countMessages,
@@ -16,6 +17,12 @@ sap.ui.define([
 	var isTemplateAvailable = false;
 	
 	var messagesModel = new sap.ui.model.json.JSONModel();
+	//for sorting
+	var oJSONData = {
+		busy : false,
+		order : 0
+	};
+	var orderModel =  new sap.ui.model.json.JSONModel(oJSONData);
 	
 	var messagesResults = [];
 	var templatesResults = [];
@@ -27,6 +34,7 @@ sap.ui.define([
 		onInit: function () {
 	    
 		this.getView().setModel(messagesModel);		//setting main model
+		this.getView().setModel(orderModel, "orderModel"); //setting model for sorter
 		this.loadMessages();
 		this._getMessageStatus();
 		//var messagesModel =new JSONModel();
@@ -542,7 +550,22 @@ sap.ui.define([
 			}
 			oBinding.filter(aFilter,"Application");
 		},
-		
+		/**
+		 * Event handler for the Sort button.
+		 * @public
+		 */
+		 onSort: function(){
+		 	var oView = this.getView(),
+			 	aStates = ["desc", "asc"],
+			 	aStateTextIds = ["sortDescending","sortAscending"],
+			 	iOrder = oView.getModel("orderModel").getProperty("/order");
+			 	
+			iOrder = (iOrder +1) % aStates.length;
+			var sOrder = aStates[iOrder];
+			
+			oView.getModel("orderModel").setProperty("/order", iOrder);
+			oView.byId("table").getBinding("items").sort(sOrder && new Sorter("EmailId", sOrder==="desc"));
+		 }
 		
 	
 
