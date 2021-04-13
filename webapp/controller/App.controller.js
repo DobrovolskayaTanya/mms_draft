@@ -10,8 +10,10 @@ sap.ui.define([
 	"use strict";
 	
 	var countMessages,
-		sMessageUUID = "42010a05-507a-1edb-a2fb-77f58cbad3b1" ,
-		sMessageID = "621",
+	//	sMessageUUID = "42010a05-507a-1edb-a2fb-77f58cbad3b1" ,
+	//	sMessageID = "621",
+		sMessageUUID,
+		sMessageID,
 	    aTextBlockContentString,
 		countLoaded = 100; 
 	var isTemplateAvailable = false;
@@ -36,7 +38,7 @@ sap.ui.define([
 		this.getView().setModel(messagesModel);		//setting main model
 		this.getView().setModel(orderModel, "orderModel"); //setting model for sorter
 		this.loadMessages();
-		this._getMessageStatus();
+//		this._getMessageStatus();
 		//var messagesModel =new JSONModel();
 		/* Test data
 		messagesModel.setData({
@@ -310,9 +312,24 @@ sap.ui.define([
 		 */
 
 		onCheckAbility:function(oEvent){
+			var aContext = this.byId("table").getSelectedContexts();
+			if(aContext.length===0){
+				sap.m.MessageToast.show(" Select an email message" , {
+							duration: 3000,
+							width:"20em"
+						});
+			}else{
+				
+			for(var i = 0; i<aContext.length; i++ )
+				var selectedRow = aContext[i].getObject();
+				sMessageUUID = selectedRow.MessageUUID;
+		    	sMessageID = selectedRow.EmailId; 
+			
+		    // pass  sMessageUUID And 	 sMessageID as params for all functions
+			this._getMessageStatus();	
+			}
 			
 			
-			this._getMessageStatus();
 			
 			/*
 			42010a05-507a-1eeb-a5db-0cb08cd25d9d  -  with two images
@@ -352,7 +369,7 @@ sap.ui.define([
 							var sMessageStatus = results.d.MessageStatus;
 							if(sMessageStatus !== "20"){
 								sap.m.MessageToast.show("Email is not released. \n Please, release the email.", {
-								duration: 7000,
+								duration: 6000,
 								width:"20em"
 								});
 							} else{
@@ -366,7 +383,7 @@ sap.ui.define([
 							if (err !== undefined) {
 							var oErrorResponse = err.responseText;
 							sap.m.MessageToast.show(" ERROR Description \n" + oErrorResponse, {
-								duration: 7000,
+								duration: 6000,
 								width:"20em"
 							});
 						} else {
@@ -404,7 +421,7 @@ sap.ui.define([
 						    		    self._checkContentString(aTextBlockContentString);
 						    		}else{
 						    			sap.m.MessageToast.show("Type of block has to be TEXT", {
-											duration: 7000,
+											duration: 6000,
 											width:"20em"
 										});
 						    		}
@@ -449,7 +466,7 @@ sap.ui.define([
 		    	console.log(isTemplateAvailable);
 		    }else{
 		    	sap.m.MessageToast.show(" Email can contain one image or one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
-								duration: 7000
+								duration: 6000
 							});
 		    }
 		    // post Ability status to CBO
@@ -530,7 +547,7 @@ sap.ui.define([
 							.done(function(results,textStatus, XMLHttpRequest){
 								oView.setBusy(false);
 								sap.m.MessageToast.show(postMessage, {
-											duration: 1000
+											duration: 500
 										});
 							})
 							.fail(function(err){

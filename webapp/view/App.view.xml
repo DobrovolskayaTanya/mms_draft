@@ -11,16 +11,16 @@
 		toggleHeaderOnTitleClick="false"
 		showFooter="true">
 
-<!--select=".onQuickFilter"-->
 
 		<semantic:content>
 				<IconTabBar
 		         id="idIconTabBar"  >
 			<content>
+				 <!--   mode="SingleSelect" -->
 			<Table
 				id="table"
 				width="auto"
-			    mode="MultiSelect"
+			    mode ="MultiSelect"
 			    growing="true"
 				growingScrollToLoad="false"
 				growingThreshold="20"
