@@ -468,6 +468,7 @@ sap.ui.define([
 		 },
 		 	/**
 		 * Function to sent ability to be Tencent template status to  CBO
+		 * Function Import Sap_upsert is used to update data
 		 * @private
 		 */
 		 _sendAbilityStatus: function(abilityFlag, postMessage){
@@ -488,12 +489,17 @@ sap.ui.define([
 				$.ajax(oSettings)
 				.done(function(results, textStatus, XMLHttpRequest){
 					this.token =XMLHttpRequest.getResponseHeader('X-CSRF-Token');
-				  	var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
-					var oPayload = {
+				  // var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
+				   var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATESap_upsert?MessageUUID='"+ sMessageUUID +"'&MessageID="+ sMessageID+"&AbilityforTemplate="+abilityFlag+"&TencentID='unknown'&TencentStatus='unknown'&SentDate=datetime'1970-01-01T00:00'";  // url for Sap_upsert
+				/*
+				   var oPayload = {
 							 		"MessageUUID": sMessageUUID ,
 							 	    "MessageID": sMessageID,
 					                "AbilityforTemplate": abilityFlag                
 							 	    };
+				*/
+					// commented for POST 
+					/*
 					var oSettingsToInsert ={
 						"url": sUrlToInsert,
 						"method" : "POST",
@@ -504,6 +510,22 @@ sap.ui.define([
 						"contentType":"application/JSON",
 						"data": JSON.stringify(oPayload)
 					};
+					*/
+					var oSettingsToInsert = {
+						"url": sUrlToInsert,
+						"method" : "POST",
+						"headers": {
+							"X-CSRF-Token": this.token
+						},
+					//	"data" : $.param(oPayload)
+					
+					/*	"data":$.param({ "MessageUUID": "\'42010a05-507a-1edb-a2fb-77f58cbad3b1\'", "MessageID" : "621",
+							"AbilityforTemplate":"0", "TencentID":"\'unknown\'", "TencentStatus":"\'unknown\'",
+							"SentDate": "datetime\'1970-01-01T00:00\'"
+							*/
+					//	}) 
+					};
+					
 						$.ajax(oSettingsToInsert)
 							.done(function(results,textStatus, XMLHttpRequest){
 								oView.setBusy(false);
