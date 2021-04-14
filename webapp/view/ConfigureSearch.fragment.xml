@@ -1,0 +1,16 @@
+<core:FragmentDefinition id="idConfigureSearch" fragmentName="ConfigureSearchFrag" height="100%" xmlns:layout="sap.ui.layout"
+	xmlns:form="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:f="sap.f">
+	<Dialog contentHeight="auto" contentWidth="auto" title="{i18n>searchBy}" showHeader="true" afterClose="onAfterClose"
+		beforeOpen="onDialogBeforeOpen" afterOpen="onDialogAfterOpen">
+		<VBox class="sapUiSmallMargin">
+			<RadioButtonGroup id="SearchGroup">
+				<RadioButton id="SearchGroup-0" text="Message Name "/>
+				<RadioButton id="SearchGroup-1" text="Message ID"/>
+			</RadioButtonGroup>
+		</VBox>
+		<buttons>
+			<Button text="{i18n>OK}" type="Emphasized" press="setSearchParameter"/>
+			<Button text="{i18n>cancel}" press="closeConfigureSearchDialog"/>
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>

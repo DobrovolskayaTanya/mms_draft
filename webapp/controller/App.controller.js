@@ -4,6 +4,7 @@ sap.ui.define([
 //	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
+//	"sap/ui/core/Fragment",
 	"sap/ui/model/Sorter",
 	"../model/formatter"
 ], function (Controller, MessageToast, Filter, FilterOperator, Sorter, formatter  ) {
@@ -17,6 +18,7 @@ sap.ui.define([
 	    aTextBlockContentString,
 		countLoaded = 100; 
 	var isTemplateAvailable = false;
+	var defaultSearchParam = "EmailId";
 	
 	var messagesModel = new sap.ui.model.json.JSONModel();
 	//for sorting
@@ -319,21 +321,30 @@ sap.ui.define([
 							width:"20em"
 						});
 			}else{
-				
-			for(var i = 0; i<aContext.length; i++ )
+			
+			/*	
+			for(var i = 0; i<aContext.length; i++ ){
 				var selectedRow = aContext[i].getObject();
 				sMessageUUID = selectedRow.MessageUUID;
 		    	sMessageID = selectedRow.EmailId; 
+		    	console.log("MessageID" + sMessageID + "and UUID" + sMessageUUID,  this);
+		    		this._getMessageStatus(sMessageUUID, sMessageID);
+			}
+			*/
+			var that = this;
+			aContext.forEach(function(element){
+				var selectedRow = element.getObject();
+				sMessageUUID = selectedRow.MessageUUID;
+		    	sMessageID = selectedRow.EmailId; 
+		    	console.log("MessageID" + sMessageID + "and UUID" + sMessageUUID, this, );
+		    	// pass  sMessageUUID And 	 sMessageID as params for all functions
+			that._getMessageStatus(sMessageUUID, sMessageID);
+			})
 			
-		    // pass  sMessageUUID And 	 sMessageID as params for all functions
-			this._getMessageStatus();	
+		    	
 			}
 			
-			
-			
 			/*
-			42010a05-507a-1eeb-a5db-0cb08cd25d9d  -  with two images
-			
 			1.  Get GUID from event
 			2. Call /API_MKT_CAMPAIGN_MESSAGE_SRV/Messages(guid'42010a05-507a-1edb-97fc-94e2d6378287')//MessageContents and check MessageStatus 
 			if MessageStatus !== 20(Released) -> NOT Message "Email is not released"
@@ -353,7 +364,7 @@ sap.ui.define([
 		 * Function to get Message status
 		 * @private
 		 */
-		 _getMessageStatus: function(){
+		 _getMessageStatus: function(sMessageUUID,sMessageID){
 		 		var oView = this.getView();
 				var oParams = {
 					$expand: "MessageContents",
@@ -374,7 +385,7 @@ sap.ui.define([
 								});
 							} else{
 								// function to count blocks and check their content
-								self._checkBlocksNumberAndContent();
+								self._checkBlocksNumberAndContent(sMessageUUID,sMessageID);
 							
 							}
 						
@@ -395,7 +406,7 @@ sap.ui.define([
 		 * Function to get number and type of blocks in the email
 		 * @private
 		 */
-		 _checkBlocksNumberAndContent: function(){
+		 _checkBlocksNumberAndContent: function(sMessageUUID,sMessageID){
 		 		var oView = this.getView();
 		 		oView.setBusy(true);
 		 		
@@ -418,7 +429,7 @@ sap.ui.define([
 						    		aTextBlockContentString = aMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
 						    		console.log(aTextBlockContentString, aTextBlockContentString.length);
 						    		if(aTextBlockContentString.length > 1){
-						    		    self._checkContentString(aTextBlockContentString);
+						    		    self._checkContentString(aTextBlockContentString,sMessageUUID,sMessageID);
 						    		}else{
 						    			sap.m.MessageToast.show("Type of block has to be TEXT", {
 											duration: 6000,
@@ -452,7 +463,7 @@ sap.ui.define([
 		 * Example string
 		 * "Message with empty subject and two images<img src="http://s7g10.scene7.com/is/image/BurberryTest/05C0B8AB-737E-4FFB-8F45-084943E2F96C?$BBY_V2_B_4X3$" alt="77777771_black3P_pt=sl_3P_23.jpg" title="77777771_black3P_pt=sl_3P_23.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142219601539" /><img src="http://s7g10.scene7.com/is/image/BurberryTest/42371C70-DF3E-4A57-99D0-4B83F138C3C4?$BBY_V2_B_4X3$" alt="45533011_black_pt=sl_5.jpg" title="45533011_black_pt=sl_5.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142459331634" />"
 		 */
-		 _checkContentString:function(oContentString){
+		 _checkContentString:function(oContentString,sMessageUUID,sMessageID){
 		 	const imageStr = "<img";
 		 	const linkStr = "href=";
 		 	let countImage = 0;
@@ -471,9 +482,9 @@ sap.ui.define([
 		    }
 		    // post Ability status to CBO
 		  	if(isTemplateAvailable){
-				this._sendAbilityStatus("1", "YES");
+				this._sendAbilityStatus("1", "YES",sMessageUUID,sMessageID);
 			}else{
-				this._sendAbilityStatus("0", "NO");
+				this._sendAbilityStatus("0", "NO",sMessageUUID,sMessageID);
 			}
 		  },
 		/**
@@ -575,8 +586,46 @@ sap.ui.define([
 				});
 		 	
 		 },
+		 /**
+		 * CONFIGURE SEARCH
+		 */
+		 openConfigureSearchDialog: function(){
+		 	var oDialog;
+		 	if(!oDialog){
+		 		oDialog = this._getConfigureSearchDialog();
+		 	}
+		 	oDialog.open();
+		 },
+		 
+		 closeConfigureSearchDialog: function(){
+		 	var oDialog;
+		 	if(!oDialog){
+		 		oDialog = this._getConfigureSearchDialog();
+		 	}
+		 	oDialog.close();
+		 },
+		 
+		 _getConfigureSearchDialog: function () {
+		 		if(!this._oConfigureSearchDialog){
+		 			this._oConfigureSearchDialog = sap.ui.xmlfragment(this.getView().getId(), "mms_template.view.ConfigureSearch", this);
+		 			this.getView().addDependent(this._oConfigureSearchDialog);
+		 		}
+		 		return this._oConfigureSearchDialog;
+		},
+		
+		setSearchParameter: function(){
+			var selectedButtonIndex = this.byId("SearchGroup").getSelectedIndex();
+			if (selectedButtonIndex === 0){
+				defaultSearchParam = "EmailName";
+				this.byId("searchField").setPlaceholder("Search by Message Name");
+			} else {
+				defaultSearchParam = "EmailId";
+				this.byId("searchField").setPlaceholder("Search by Message Id");
+			}
+			this.closeConfigureSearchDialog();
+		},
 		/**
-		 * Event handler for the Search feild. Will seach data by Email ID
+		 * Event handler for the Search feild. 
 		 * @public
 		 */
 		onSearchMessages: function(oEvent){
@@ -585,7 +634,7 @@ sap.ui.define([
 			var aFilter = [];
 			var sQuery = oEvent.getParameter("query");
 			if (sQuery) {
-				aFilter.push(new sap.ui.model.Filter("EmailId", sap.ui.model.FilterOperator.EQ, sQuery));
+				aFilter.push(new sap.ui.model.Filter(defaultSearchParam, sap.ui.model.FilterOperator.EQ, sQuery));
 			}
 			oBinding.filter(aFilter,"Application");
 		},

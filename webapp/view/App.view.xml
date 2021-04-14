@@ -43,6 +43,7 @@
 						<SearchField
 							id="searchField"
 							tooltip="{i18n>worklistSearchTooltip}"
+							placeholder="Search by Message ID"
 							search=".onSearchMessages">
 							<layoutData>
 								<OverflowToolbarLayoutData
@@ -50,6 +51,7 @@
 									priority="NeverOverflow"/>
 							</layoutData>
 						</SearchField>
+						<Button tooltip="Configure Search" icon="sap-icon://action-settings" press="openConfigureSearchDialog"/>
 						<Button
 							id="sortUsersButton"
 							press="onSort"
