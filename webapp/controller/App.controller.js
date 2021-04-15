@@ -17,7 +17,6 @@ sap.ui.define([
 		sMessageID,
 	    aTextBlockContentString,
 		countLoaded = 100; 
-	var isTemplateAvailable = false;
 	var defaultSearchParam = "EmailId";
 	
 	var messagesModel = new sap.ui.model.json.JSONModel();
@@ -40,6 +39,7 @@ sap.ui.define([
 		this.getView().setModel(messagesModel);		//setting main model
 		this.getView().setModel(orderModel, "orderModel"); //setting model for sorter
 		this.loadMessages();
+	//	this._formatDateForUpsert();
 //		this._getMessageStatus();
 		//var messagesModel =new JSONModel();
 		/* Test data
@@ -336,7 +336,7 @@ sap.ui.define([
 				var selectedRow = element.getObject();
 				sMessageUUID = selectedRow.MessageUUID;
 		    	sMessageID = selectedRow.EmailId; 
-		    	console.log("MessageID" + sMessageID + "and UUID" + sMessageUUID, this, );
+		    //	console.log("MessageID" + sMessageID + "and UUID" + sMessageUUID, this, );
 		    	// pass  sMessageUUID And 	 sMessageID as params for all functions
 			that._getMessageStatus(sMessageUUID, sMessageID);
 			})
@@ -380,7 +380,7 @@ sap.ui.define([
 							var sMessageStatus = results.d.MessageStatus;
 							if(sMessageStatus !== "20"){
 								sap.m.MessageToast.show("Email is not released. \n Please, release the email.", {
-								duration: 6000,
+								duration: 4000,
 								width:"20em"
 								});
 							} else{
@@ -468,16 +468,20 @@ sap.ui.define([
 		 	const linkStr = "href=";
 		 	let countImage = 0;
 			let countLink = 0;
+			let isTemplateAvailable = false;   // Block scope. Check that is cleaned before next run
 		    //find and count occurrences of Image -> Substring <img src=	
 		    countImage = this.countOccurances(oContentString,imageStr);
 		     //find and count occurrences of Link -> Substring href=
 		    countLink = this.countOccurances(oContentString,linkStr);
 		    if(countImage <= 1 && countLink <= 1){
 		    	isTemplateAvailable = true;
-		    	console.log(isTemplateAvailable);
+		    	console.log("isTemplateAvailable" +isTemplateAvailable);
+		    	console.log("countImage" +countImage+ "countLink"+ countLink);
 		    }else{
+		    	console.log("isTemplateAvailable" +isTemplateAvailable);
+		    	console.log("countImage" +countImage+ "countLink"+ countLink);
 		    	sap.m.MessageToast.show(" Email can contain one image or one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
-								duration: 6000
+								duration: 5000
 							});
 		    }
 		    // post Ability status to CBO
@@ -513,12 +517,16 @@ sap.ui.define([
 					"dataType": "json",
 					"contentType": "application/json"
 				};
-				
+				var that = this;
 				$.ajax(oSettings)
 				.done(function(results, textStatus, XMLHttpRequest){
 					this.token =XMLHttpRequest.getResponseHeader('X-CSRF-Token');
+					var sDate = new Date();
+			    	var sentDate = that._formatDateForUpsert(sDate);
 				  // var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
-				   var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATESap_upsert?MessageUUID='"+ sMessageUUID +"'&MessageID="+ sMessageID+"&AbilityforTemplate="+abilityFlag+"&TencentID='unknown'&TencentStatus='unknown'&SentDate=datetime'1970-01-01T00:00'";  // url for Sap_upsert
+				   var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATESap_upsert?MessageUUID='"+ sMessageUUID +"'&MessageID="+ sMessageID+
+				   "&AbilityforTemplate="+abilityFlag+"&TencentID='unknown'&TencentStatus='unknown'&SentDate=datetime'"+sentDate+"'";
+				  // "&AbilityforTemplate="+abilityFlag+"&TencentID='unknown'&TencentStatus='unknown'&SentDate=datetime'1970-01-01T00:00'";  // url for Sap_upsert
 				/*
 				   var oPayload = {
 							 		"MessageUUID": sMessageUUID ,
@@ -586,6 +594,15 @@ sap.ui.define([
 				});
 		 	
 		 },
+		  /**
+		 * CONFIGURE SEARCH
+		 */
+		 _formatDateForUpsert: function(sDate){
+		 //	var d = new Date();
+			var d = new Date(sDate.getTime() - 3000000);
+			var dateForUpsert = d.getFullYear().toString()+"-"+((d.getMonth()+1).toString().length==2?(d.getMonth()+1).toString():"0"+(d.getMonth()+1).toString())+"-"+(d.getDate().toString().length==2?d.getDate().toString():"0"+d.getDate().toString())+"T"+(d.getHours().toString().length==2?d.getHours().toString():"0"+d.getHours().toString())+":"+((parseInt(d.getMinutes()/5)*5).toString().length==2?(parseInt(d.getMinutes()/5)*5).toString():"0"+(parseInt(d.getMinutes()/5)*5).toString())+":00";
+			return dateForUpsert;
+		},
 		 /**
 		 * CONFIGURE SEARCH
 		 */

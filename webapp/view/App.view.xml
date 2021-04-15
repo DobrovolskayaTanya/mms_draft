@@ -106,7 +106,8 @@
 							<Text
 								text="{MMSID}" />
 							<Text
-								text="{Status}"  />
+								text="{Status}"
+								/>
 						
 							<ObjectStatus
 								text="{
