@@ -427,10 +427,10 @@ sap.ui.define([
 						   [0,1].forEach(function(i){
 						    	if(aMessageBlocks[i].BlockType === "TEXT"){
 						    		aTextBlockContentString = aMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
-						    		console.log(aTextBlockContentString, aTextBlockContentString.length);
 						    		if(aTextBlockContentString.length > 1){
 						    		    self._checkContentString(aTextBlockContentString,sMessageUUID,sMessageID);
 						    		}else{
+						    			self._sendAbilityStatus("0", "NO",sMessageUUID,sMessageID);
 						    			sap.m.MessageToast.show("Type of block has to be TEXT", {
 											duration: 6000,
 											width:"20em"
@@ -440,8 +440,9 @@ sap.ui.define([
 						   });
 						   // 	}
 						}else{
+							self._sendAbilityStatus("0", "NO",sMessageUUID,sMessageID);
 							sap.m.MessageToast.show("Email has to contain only one Text block", {
-							duration: 7000,
+							duration: 6000,
 							width:"20em"
 							});
 						}
@@ -503,7 +504,7 @@ sap.ui.define([
 		 * Function Import Sap_upsert is used to update data
 		 * @private
 		 */
-		 _sendAbilityStatus: function(abilityFlag, postMessage){
+		 _sendAbilityStatus: function(abilityFlag, postMessage,sMessageUUID,sMessageID){
 		 		var oView = this.getView();
 		 		oView.setBusy(true);
 		 		
