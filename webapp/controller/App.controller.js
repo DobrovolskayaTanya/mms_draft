@@ -13,7 +13,7 @@ sap.ui.define([
 	var countMessages,
 	//	sMessageUUID = "42010a05-507a-1edb-a2fb-77f58cbad3b1" ,
 	//	sMessageID = "621",
-		sMessageUUID,
+	    sMessageUUID,
 		sMessageID,
 	    aTextBlockContentString,
 		countLoaded = 100; 
@@ -290,13 +290,124 @@ sap.ui.define([
  
 		
 		/**
-		 * Event handler for the Save template button. Will send the
+		 * Event handler for the Snd template button. Will send the
 		 * email content to CPI and change Tencent status to initil
 		 * value Sent
 		 * @public
 		 */
-		onSaveTemplate: function(){
+		onSendTemplate: function(){
+			var selectedRow,
+				tMessageUUID,
+			    tMessageID,
+			    tAbilityforTemplate;
+			var aContext = this.byId("table").getSelectedContexts();
+				aContext.forEach(function(element){
+					selectedRow = element.getObject();
+					tMessageUUID = selectedRow.MessageUUID;
+			    	tMessageID = selectedRow.EmailId; 
+			    	tAbilityforTemplate = selectedRow.AbilityforTemplate;
+				});
 			
+			if(aContext.length===0){
+				sap.m.MessageToast.show(" Select an email message" , {
+							duration: 3000,
+							width:"20em"
+						});
+			}else if(tAbilityforTemplate !== 1){				//change to 0 after testing
+				sap.m.MessageToast.show("This email is not compatable to be an Tencent template" , {
+							duration: 3000,
+							width:"20em"
+						});
+			}else {
+				// call MKT by MessageGUID and get
+				var sMessageUUID, //from aContent
+				    sMessageID,   //from aContent
+				    emailName,    // from Mkt API
+				    tencentId,     // from CPI API response
+				    contentHTMLString,  //from Mkt API
+					emailTitle;         //from Mkt API
+				// function to form TemplateText and cut image	
+				var oView = this.getView();
+			
+		 		oView.setBusy(true);
+		 		var oPayload  = {
+		 			"TemplateName":"Test_MMS_Template_from SCP App",
+					"TemplateTitle":"配饰新品速递",
+					"TemplateSign":"Burberry",
+					"TemplateText":"全新发布精品",
+					"TemplateImage":"https://assets.static.burberry.com/email/COMMON-LIBRARY/00_LOGO/00_LOGO_S.png"
+		 		};
+		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
+				var oSettings = {
+						"url": sUrl,
+						"method" : "POST",
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data" : JSON.stringify(oPayload)
+					};
+					
+				$.ajax(oSettings)
+					.done(function(results,textStatus, XMLHttpRequest){
+					oView.setBusy(false);
+					tencentId = results.Response.Data.InstanceId;
+					sap.m.MessageToast.show("Post done" + tencentId, {
+						duration: 500
+						});
+					//post the tencent status to CBO
+			/*			var sUrlCBO = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
+						var oSettings = {
+							"url": sUrlCBO,
+							"method": "GET", 
+						 	"headers": {
+								"X-CSRF-Token": "Fetch"
+							},
+							"dataType": "json",
+							"contentType": "application/json"
+						};
+						var that = this;
+						$.ajax(oSettings)
+							.done(function(results, textStatus, XMLHttpRequest){
+								this.token =XMLHttpRequest.getResponseHeader('X-CSRF-Token');
+								var sDate = new Date();
+						    	var sentDate = that._formatDateForUpsert(sDate);
+						//	    var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
+						    var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATESap_upsert?MessageUUID='"+ tMessageUUID +"'&MessageID="+ tMessageID+
+						    "&AbilityforTemplate="1"&TencentID="+tencentId+"&TencentStatus='created'&SentDate=datetime'"+sentDate+"'";
+					
+						$.ajax(oSettingsToInsert)
+							.done(function(results,textStatus, XMLHttpRequest){
+								oView.setBusy(false);
+								sap.m.MessageToast.show("Tencent ID inserted in CBO" + tencentId, {
+											duration: 500
+										});
+										
+							})
+							.fail(function(err){
+								if (err !== undefined) {
+									oView.setBusy(false);
+									var oErrorResponse = err.responseText;
+										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+											duration: 6000
+										});
+									} else {
+										sap.m.MessageToast.show("Unknown error!");
+									}
+							});
+							*/
+					
+				})	
+		 		.fail(function(err){
+						if (err !== undefined) {
+								var oErrorResponse = err.responseText;
+								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+									});
+						} else {
+							sap.m.MessageToast.show("Unknown error!");
+						}
+				});
+				
+			} //else
 		},
 	
 		/**
@@ -304,7 +415,8 @@ sap.ui.define([
 		 * actual Tencent status (from Sent to Aprooved) and update UI
 		 * @public
 		 */
-		onCheckStatus: function(){
+		onCheckStatus: function(oEvent){
+			
 			
 		},
 		/**
@@ -440,6 +552,7 @@ sap.ui.define([
 						   });
 						   // 	}
 						}else{
+							oView.setBusy(false);
 							self._sendAbilityStatus("0", "NO",sMessageUUID,sMessageID);
 							sap.m.MessageToast.show("Email has to contain only one Text block", {
 							duration: 6000,
@@ -499,7 +612,7 @@ sap.ui.define([
 		 countOccurances: function(oString,oSubString){
 		 	return oString.split(oSubString).length - 1;
 		 },
-		 	/**
+		 /**
 		 * Function to sent ability to be Tencent template status to  CBO
 		 * Function Import Sap_upsert is used to update data
 		 * @private
@@ -595,8 +708,9 @@ sap.ui.define([
 				});
 		 	
 		 },
-		  /**
-		 * CONFIGURE SEARCH
+		/**
+		 * Format Date for sap upsert
+		 * @private
 		 */
 		 _formatDateForUpsert: function(sDate){
 		 //	var d = new Date();
@@ -652,7 +766,11 @@ sap.ui.define([
 			var aFilter = [];
 			var sQuery = oEvent.getParameter("query");
 			if (sQuery) {
-				aFilter.push(new sap.ui.model.Filter(defaultSearchParam, sap.ui.model.FilterOperator.EQ, sQuery));
+				if(defaultSearchParam === "EmailId"){
+					aFilter.push(new sap.ui.model.Filter(defaultSearchParam, sap.ui.model.FilterOperator.EQ, sQuery));
+				}else{
+					aFilter.push(new sap.ui.model.Filter(defaultSearchParam, sap.ui.model.FilterOperator.Contains, sQuery));
+				}
 			}
 			oBinding.filter(aFilter,"Application");
 		},

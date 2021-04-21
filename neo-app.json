@@ -17,6 +17,14 @@
 		},
 		"description": "Tencent template statuses CBO"
 	},
+	{
+		"path": "/API_CPI_TENCENT",
+		"target": {
+			"type": "destination",
+			"name": "API_CPI_TENCENT"
+		},
+		"description": "CPI API Tencent template"
+	},
     {
       "path": "/resources",
       "target": {

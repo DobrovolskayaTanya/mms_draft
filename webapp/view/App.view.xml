@@ -16,11 +16,11 @@
 				<IconTabBar
 		         id="idIconTabBar"  >
 			<content>
-				 <!--   mode="SingleSelect" -->
+				 <!--   mode="SingleSelectLeft" -->
 			<Table
 				id="table"
 				width="auto"
-			    mode ="MultiSelect"
+			    mode ="SingleSelectLeft"
 			    growing="true"
 				growingScrollToLoad="false"
 				growingThreshold="20"
@@ -133,7 +133,7 @@
 		<!-- Custom Footer Content-->
 		<semantic:footerCustomActions>
 			<Button text="{i18n>checkAbility}" press=".onCheckAbility" class="sapUiTinyMarginBeginEnd" type="Emphasized"  icon="sap-icon://accept"/>
-			<Button text="{i18n>saveTemplate}" press=".onSaveTemplate"	class="sapUiTinyMarginBeginEnd" type="Emphasized" icon="sap-icon://action" />
+			<Button text="{i18n>saveTemplate}" press=".onSendTemplate"	class="sapUiTinyMarginBeginEnd" type="Emphasized" icon="sap-icon://action" />
 			<Button text="{i18n>checkStatus}" press=".onCheckStatus" class="sapUiTinyMarginBeginEnd" type="Emphasized" icon="sap-icon://cause" />
 		</semantic:footerCustomActions>
 	 
