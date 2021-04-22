@@ -299,36 +299,149 @@ sap.ui.define([
 			var selectedRow,
 				tMessageUUID,
 			    tMessageID,
-			    tAbilityforTemplate;
+			    tAbilityforTemplate,
+			    emailName,    // from Mkt API
+		//		tencentId,     // from CPI API response
+				contentHTMLString,  //from Mkt API
+				emailTitle;         //from Mkt API
+		var	tencentId = "223344";
+		
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
 					selectedRow = element.getObject();
 					tMessageUUID = selectedRow.MessageUUID;
 			    	tMessageID = selectedRow.EmailId; 
-			    	tAbilityforTemplate = selectedRow.AbilityforTemplate;
+			    	tAbilityforTemplate = selectedRow.Ability;
 				});
 			
 			if(aContext.length===0){
 				sap.m.MessageToast.show(" Select an email message" , {
-							duration: 3000,
-							width:"20em"
+							duration: 3000				
 						});
-			}else if(tAbilityforTemplate !== 1){				//change to 0 after testing
+			}else if(tAbilityforTemplate !== "1"){				
 				sap.m.MessageToast.show("This email is not compatable to be an Tencent template" , {
-							duration: 3000,
-							width:"20em"
+							duration: 3000
 						});
 			}else {
-				// call MKT by MessageGUID and get
-				var sMessageUUID, //from aContent
-				    sMessageID,   //from aContent
-				    emailName,    // from Mkt API
-				    tencentId,     // from CPI API response
-				    contentHTMLString,  //from Mkt API
-					emailTitle;         //from Mkt API
-				// function to form TemplateText and cut image	
 				var oView = this.getView();
+				// call MKT by MessageGUID and get
+				var oParams = {
+					$format: "json",
+					$expand: "MessageBlockContents"
+				};
+
+				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + tMessageUUID + "',LanguageCode='ZH')/MessageBlocks";
+				var self = this;
+				
+				$.get(sUrl,oParams)
+					.done(function(results){
+						oView.setBusy(false);
+						var tMessageBlocks = results.d.results;
+						    [0,1].forEach(function(i){					//should be improove loop
+					//	    tMessageBlocks.forEach(function(undefined,i){
+						    	switch(tMessageBlocks[i].BlockType){
+						    		case 'TEXT':
+							    		contentHTMLString = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
+							    		console.log( "Text "+contentHTMLString);
+							    		break;
+						    		case'SUBJECT':
+										emailTitle = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
+										console.log("Subject" +emailTitle);
+										break;
+						    		}
+						   });
+					})
+					.fail(function(err){
+						if (err !== undefined) {
+							oView.setBusy(false);
+							var oErrorResponse = err.responseText;
+							sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+							});
+						} else {
+							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
+						}
+					});
+				// update Tencent ID and TencentStatus in CBO
+//				var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+%27+%27tMessageUUID%27+%27";
+		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
+					var oSettings = {
+					"url": sUrl,
+					"method": "GET", 
+				 	"headers": {
+						"X-CSRF-Token": "Fetch"
+					},
+					"dataType": "json",
+					"contentType": "application/json"
+				};
+				var that = this;
+				$.ajax(oSettings)
+				.done(function(results, textStatus, XMLHttpRequest){
+					console.log("done");
+					var token = XMLHttpRequest.getResponseHeader('X-CSRF-Token');
+					console.log(token);
+					//var sapUUID = '42010a05-507a-1eeb-a8d1-74591fa3823b';
+								    
+					results.d.results[0].SAP_UUID
+					var sDate = new Date();
+			    	var sentDate = that._formatDateForUpsert(sDate);
+				
+ 			       var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE(guid'"+sapUUID+"')";
+				 
+				   var oPayload = {
+							 		"MessageUUID": tMessageUUID,
+								    "MessageID": tMessageID,
+								    "TencentID": tencentId,
+								    "AbilityforTemplate":"1",
+								    "TencentStatus": "created",
+								    "SentDate":sentDate            
+							 	    };
+					var oSettingsToInsert = {
+						"url": sUrlToInsert,
+						"method" : "PUT",
+						"headers": {
+							"X-CSRF-Token": token
+						},
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data" : JSON.stringify(oPayload)
+					};
+						$.ajax(oSettingsToInsert)
+							.done(function(results,textStatus, XMLHttpRequest){
+								oView.setBusy(false);
+								sap.m.MessageToast.show("TencentID was updated " + tencentId, {
+											duration: 500
+										});
+							})
+							.fail(function(err){
+								if (err !== undefined) {
+									oView.setBusy(false);
+									var oErrorResponse = err.responseText;
+										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+											duration: 6000
+										});
+									} else {
+										sap.m.MessageToast.show("Unknown error!");
+									}
+							});
+					
+				})	
+		 		.fail(function(err){
+						if (err !== undefined) {
+								var oErrorResponse = err.responseText;
+								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+									});
+						} else {
+							sap.m.MessageToast.show("Unknown error!");
+						}
+				});
+		 	
+		 
+				    
+			// function to form TemplateText and cut image	
 			
+/*			
 		 		oView.setBusy(true);
 		 		var oPayload  = {
 		 			"TemplateName":"Test_MMS_Template_from SCP App",
@@ -353,6 +466,7 @@ sap.ui.define([
 					sap.m.MessageToast.show("Post done" + tencentId, {
 						duration: 500
 						});
+*/						
 					//post the tencent status to CBO
 			/*			var sUrlCBO = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
 						var oSettings = {
@@ -395,7 +509,7 @@ sap.ui.define([
 							});
 							*/
 					
-				})	
+/*				})	
 		 		.fail(function(err){
 						if (err !== undefined) {
 								var oErrorResponse = err.responseText;
@@ -406,7 +520,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				});
-				
+*/				
 			} //else
 		},
 	
