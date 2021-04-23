@@ -301,10 +301,10 @@ sap.ui.define([
 			    tMessageID,
 			    tAbilityforTemplate,
 			    emailName,    // from Mkt API
-		//		tencentId,     // from CPI API response
+				tencentId,     // from CPI API response
 				contentHTMLString,  //from Mkt API
 				emailTitle;         //from Mkt API
-		var	tencentId = "223344";
+		var	tencentId = "21527";
 		
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
@@ -337,8 +337,7 @@ sap.ui.define([
 					.done(function(results){
 						oView.setBusy(false);
 						var tMessageBlocks = results.d.results;
-						    [0,1].forEach(function(i){					//should be improove loop
-					//	    tMessageBlocks.forEach(function(undefined,i){
+						    [0,1].forEach(function(i){
 						    	switch(tMessageBlocks[i].BlockType){
 						    		case 'TEXT':
 							    		contentHTMLString = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
@@ -362,8 +361,41 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
 						}
 					});
+			
+		 	
+		 
+				    
+			// function to form TemplateText and cut image	
+			
+			
+/*		 		oView.setBusy(true);
+		 		var oPayload  = {
+		 			"TemplateName":"Email",
+					"TemplateTitle":"感谢您的订阅", 
+					"TemplateSign":"Burberry",
+					"TemplateText":"精品之作, 专属为你品", 
+					"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
+		 		};
+		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
+				var oSettings = {
+						"url": sUrl,
+						"method" : "POST",
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data" : JSON.stringify(oPayload)
+					};
+					
+				$.ajax(oSettings)
+					.done(function(results,textStatus, XMLHttpRequest){
+					oView.setBusy(false);
+			// if Data is undefined. Potentially by duplicates. Optional chain ? and If undefined check		
+					tencentId = results.Response.Data.InstanceId;
+					sap.m.MessageToast.show("Post done" + tencentId, {
+						duration: 500
+						});
+						
+*/				//PUT the tencent status to CBO
 				// update Tencent ID and TencentStatus in CBO
-//				var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+%27+%27tMessageUUID%27+%27";
 		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
 					var oSettings = {
 					"url": sUrl,
@@ -380,9 +412,7 @@ sap.ui.define([
 					console.log("done");
 					var token = XMLHttpRequest.getResponseHeader('X-CSRF-Token');
 					console.log(token);
-					//var sapUUID = '42010a05-507a-1eeb-a8d1-74591fa3823b';
-								    
-					results.d.results[0].SAP_UUID
+					var sapUUID = results.d.results[0].SAP_UUID;
 					var sDate = new Date();
 			    	var sentDate = that._formatDateForUpsert(sDate);
 				
@@ -410,7 +440,7 @@ sap.ui.define([
 							.done(function(results,textStatus, XMLHttpRequest){
 								oView.setBusy(false);
 								sap.m.MessageToast.show("TencentID was updated " + tencentId, {
-											duration: 500
+											duration: 4000
 										});
 							})
 							.fail(function(err){
@@ -436,79 +466,8 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				});
-		 	
-		 
-				    
-			// function to form TemplateText and cut image	
-			
-/*			
-		 		oView.setBusy(true);
-		 		var oPayload  = {
-		 			"TemplateName":"Test_MMS_Template_from SCP App",
-					"TemplateTitle":"配饰新品速递",
-					"TemplateSign":"Burberry",
-					"TemplateText":"全新发布精品",
-					"TemplateImage":"https://assets.static.burberry.com/email/COMMON-LIBRARY/00_LOGO/00_LOGO_S.png"
-		 		};
-		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
-				var oSettings = {
-						"url": sUrl,
-						"method" : "POST",
-						"dataType":"json",
-						"contentType":"application/JSON",
-						"data" : JSON.stringify(oPayload)
-					};
-					
-				$.ajax(oSettings)
-					.done(function(results,textStatus, XMLHttpRequest){
-					oView.setBusy(false);
-					tencentId = results.Response.Data.InstanceId;
-					sap.m.MessageToast.show("Post done" + tencentId, {
-						duration: 500
-						});
-*/						
-					//post the tencent status to CBO
-			/*			var sUrlCBO = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
-						var oSettings = {
-							"url": sUrlCBO,
-							"method": "GET", 
-						 	"headers": {
-								"X-CSRF-Token": "Fetch"
-							},
-							"dataType": "json",
-							"contentType": "application/json"
-						};
-						var that = this;
-						$.ajax(oSettings)
-							.done(function(results, textStatus, XMLHttpRequest){
-								this.token =XMLHttpRequest.getResponseHeader('X-CSRF-Token');
-								var sDate = new Date();
-						    	var sentDate = that._formatDateForUpsert(sDate);
-						//	    var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE/";
-						    var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATESap_upsert?MessageUUID='"+ tMessageUUID +"'&MessageID="+ tMessageID+
-						    "&AbilityforTemplate="1"&TencentID="+tencentId+"&TencentStatus='created'&SentDate=datetime'"+sentDate+"'";
-					
-						$.ajax(oSettingsToInsert)
-							.done(function(results,textStatus, XMLHttpRequest){
-								oView.setBusy(false);
-								sap.m.MessageToast.show("Tencent ID inserted in CBO" + tencentId, {
-											duration: 500
-										});
-										
-							})
-							.fail(function(err){
-								if (err !== undefined) {
-									oView.setBusy(false);
-									var oErrorResponse = err.responseText;
-										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
-											duration: 6000
-										});
-									} else {
-										sap.m.MessageToast.show("Unknown error!");
-									}
-							});
-							*/
-					
+		
+				// end PUT the tencent status to CBO	
 /*				})	
 		 		.fail(function(err){
 						if (err !== undefined) {
@@ -641,13 +600,14 @@ sap.ui.define([
 					$expand: "MessageBlockContents"
 				};
 
-				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + sMessageUUID + "',LanguageCode='EN')/MessageBlocks";
+				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + sMessageUUID + "',LanguageCode='ZH')/MessageBlocks";
 				var self = this;
 				
 				$.get(sUrl,oParams)
 					.done(function(results){
 						oView.setBusy(false);
 						aMessageBlocks = results.d.results;
+			// check it is not empty.Translated on Chinese			
 						if(aMessageBlocks.length === 2){
 						   // for (var i = 0; aMessageBlocks.length-1; i++){
 						   [0,1].forEach(function(i){
