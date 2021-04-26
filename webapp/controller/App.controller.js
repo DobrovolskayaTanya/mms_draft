@@ -11,8 +11,6 @@ sap.ui.define([
 	"use strict";
 	
 	var countMessages,
-	//	sMessageUUID = "42010a05-507a-1edb-a2fb-77f58cbad3b1" ,
-	//	sMessageID = "621",
 	    sMessageUUID,
 		sMessageID,
 	    aTextBlockContentString,
@@ -303,8 +301,10 @@ sap.ui.define([
 			    emailName,    // from Mkt API
 				tencentId,     // from CPI API response
 				contentHTMLString,  //from Mkt API
+				templateImage,      //parse HTML string from Mkt API
+				templateString,     //parse HTML string from Mkt API
 				emailTitle;         //from Mkt API
-		var	tencentId = "21527";
+		var	tencentId = "11111";
 		
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
@@ -367,14 +367,18 @@ sap.ui.define([
 				    
 			// function to form TemplateText and cut image	
 			
-			
-/*		 		oView.setBusy(true);
+/*			
+		 		oView.setBusy(true);
 		 		var oPayload  = {
 		 			"TemplateName":"Email",
+		 		//	"TemplateName": emailName,
 					"TemplateTitle":"感谢您的订阅", 
+				//	"TemplateTitle": emailTitle, 
 					"TemplateSign":"Burberry",
-					"TemplateText":"精品之作, 专属为你品", 
+					"TemplateText":"精品之作 敬邀悦享 Burberry 独家壁纸 cn.burberry.com 敬邀悦享", 
+				//	"TemplateText": templateString, 	
 					"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
+				//	"TemplateImage": templateImage
 		 		};
 		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
 				var oSettings = {
@@ -393,8 +397,8 @@ sap.ui.define([
 					sap.m.MessageToast.show("Post done" + tencentId, {
 						duration: 500
 						});
-						
-*/				//PUT the tencent status to CBO
+*/						
+				//PUT the tencent status to CBO
 				// update Tencent ID and TencentStatus in CBO
 		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
 					var oSettings = {
@@ -489,7 +493,142 @@ sap.ui.define([
 		 * @public
 		 */
 		onCheckStatus: function(oEvent){
+				var selectedRow,
+				tMessageUUID,
+			    tMessageID,
+				tTencentId,     // from CPI API response
+				tTencentStatus;
+//		var	tencentId = "11111";
+				var newTencentStatus = "gmcc OK, unicom OK, cdma OK";
+		
+			var aContext = this.byId("table").getSelectedContexts();
+				aContext.forEach(function(element){
+					selectedRow = element.getObject();
+					tMessageUUID = selectedRow.MessageUUID;
+			    	tMessageID = selectedRow.EmailId;
+			    	tTencentId = selectedRow.MMSID;
+			    	tTencentStatus = selectedRow.Status;
+				});
 			
+			if(aContext.length===0){
+				sap.m.MessageToast.show(" Select an email message" , {
+							duration: 3000				
+						});
+			}else if(tTencentStatus !== "created"){				
+				sap.m.MessageToast.show("Email is not sent. Send  an email for template creation" , {
+							duration: 3000
+						});
+			}else {
+			// call CPI API GetTemplateStatus to get Operator statuses
+/*				var oView = this.getView();
+		 		oView.setBusy(true);
+		 	    var oPayload = {
+		 	    	"TemplateId" : tTencentId
+		 	//		"TemplateId" : "21407"
+		 	    };
+		 		var sUrl = "/API_CPI_TENCENT/GetTemplateStatus";
+				var oSettings = {
+						"url": sUrl,
+						"method" : "GET",
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data" : JSON.stringify(oPayload)
+					};
+					
+				$.ajax(oSettings)
+					.done(function(results,textStatus, XMLHttpRequest){
+					oView.setBusy(false)
+					
+					newTencentStatus = "gmcc OK, unicom OK, cdma OK";
+					sap.m.MessageToast.show("New tencent status" + newTencentStatus, {
+						duration: 500
+						});
+*/						
+				//PUT the tencent status to CBO
+		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
+					var oSettings = {
+					"url": sUrl,
+					"method": "GET", 
+				 	"headers": {
+						"X-CSRF-Token": "Fetch"
+					},
+					"dataType": "json",
+					"contentType": "application/json"
+				};
+				var that = this;
+				$.ajax(oSettings)
+				.done(function(results, textStatus, XMLHttpRequest){
+					var token = XMLHttpRequest.getResponseHeader('X-CSRF-Token');
+					var sapUUID = results.d.results[0].SAP_UUID;
+					var sDate = new Date();
+			    	var sentDate = that._formatDateForUpsert(sDate);
+				
+ 			       var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE(guid'"+sapUUID+"')";
+				 
+				   var oPayload = {
+							 		"MessageUUID": tMessageUUID,
+								    "MessageID": tMessageID,
+								    "TencentID": tTencentId,
+								    "AbilityforTemplate":"1",
+								    "TencentStatus": newTencentStatus,
+								    "SentDate":sentDate            
+							 	    };
+					var oSettingsToInsert = {
+						"url": sUrlToInsert,
+						"method" : "PUT",
+						"headers": {
+							"X-CSRF-Token": token
+						},
+						"dataType":"json",
+						"contentType":"application/JSON",
+						"data" : JSON.stringify(oPayload)
+					};
+						$.ajax(oSettingsToInsert)
+							.done(function(results,textStatus, XMLHttpRequest){
+					//			oView.setBusy(false);
+								sap.m.MessageToast.show("Tencent Status was updated " + newTencentStatus, {
+											duration: 4000
+										});
+							})
+							.fail(function(err){
+								if (err !== undefined) {
+					//				oView.setBusy(false);
+									var oErrorResponse = err.responseText;
+										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+											duration: 6000
+										});
+									} else {
+										sap.m.MessageToast.show("Unknown error!");
+									}
+							});
+				})	
+		 		.fail(function(err){
+						if (err !== undefined) {
+				//			oView.setBusy(false);
+								var oErrorResponse = err.responseText;
+								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+									});
+						} else {
+							sap.m.MessageToast.show("Unknown error!");
+						}
+				})
+/*		})
+				// end PUT the tencent status to CBO	
+/*		 		.fail(function(err){
+						if (err !== undefined) {
+							    oView.setBusy(false);
+								var oErrorResponse = err.responseText;
+								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+									});
+						} else {
+							sap.m.MessageToast.show("Unknown error!");
+						}
+				});
+*/				
+				
+			} //else
 			
 		},
 		/**
@@ -497,7 +636,7 @@ sap.ui.define([
 		 * actual Tencent status (from Sent to Aprooved) and update UI
 		 * @public
 		 */
-
+	
 		onCheckAbility:function(oEvent){
 			var aContext = this.byId("table").getSelectedContexts();
 			if(aContext.length===0){

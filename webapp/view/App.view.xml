@@ -105,9 +105,9 @@
 							    state ="{=	${Ability} === '1' ? 'Success'  : 'Error'}"/>
 							<Text
 								text="{MMSID}" />
-							<Text
+							<ObjectStatus
 								text="{Status}"
-								/>
+								state ="{=	${Status} === 'unknown' ? 'Error': 'Success'}"/>
 						
 							<ObjectStatus
 								text="{
