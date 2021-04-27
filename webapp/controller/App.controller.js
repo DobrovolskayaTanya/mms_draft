@@ -298,19 +298,20 @@ sap.ui.define([
 				tMessageUUID,
 			    tMessageID,
 			    tAbilityforTemplate,
-			    emailName,    // from Mkt API
+			    tEmailName,    // from Mkt API
 				tencentId,     // from CPI API response
 				contentHTMLString,  //from Mkt API
 				templateImage,      //parse HTML string from Mkt API
 				templateString,     //parse HTML string from Mkt API
 				emailTitle;         //from Mkt API
-		var	tencentId = "11111";
+
 		
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
 					selectedRow = element.getObject();
 					tMessageUUID = selectedRow.MessageUUID;
 			    	tMessageID = selectedRow.EmailId; 
+			    	tEmailName = selectedRow.EmailName;
 			    	tAbilityforTemplate = selectedRow.Ability;
 				});
 			
@@ -331,8 +332,10 @@ sap.ui.define([
 				};
 
 				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + tMessageUUID + "',LanguageCode='ZH')/MessageBlocks";
-				var self = this;
-				
+		//		var self = this;
+			var that = this;
+		 	oView.setBusy(true);
+		// to get Email name		
 				$.get(sUrl,oParams)
 					.done(function(results){
 						oView.setBusy(false);
@@ -349,37 +352,21 @@ sap.ui.define([
 										break;
 						    		}
 						   });
-					})
-					.fail(function(err){
-						if (err !== undefined) {
-							oView.setBusy(false);
-							var oErrorResponse = err.responseText;
-							sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
-								duration: 6000
-							});
-						} else {
-							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
-						}
-					});
-			
-		 	
-		 
-				    
-			// function to form TemplateText and cut image	
-			
-/*			
-		 		oView.setBusy(true);
-		 		var oPayload  = {
-		 			"TemplateName":"Email",
-		 		//	"TemplateName": emailName,
-					"TemplateTitle":"感谢您的订阅", 
-				//	"TemplateTitle": emailTitle, 
+					// function to form TemplateText and cut image		   
+					//Check contentHTMLString is not empty	   
+					// POST Tencent statuses with content and within it PUT/UPDATE Tencent Status and ID in CBO
+				   var oPayload  = {
+		 	//		"TemplateName":"Email",
+		 			"TemplateName": tEmailName,
+			//		"TemplateTitle":"感谢您的订阅Burberry", 
+			    	"TemplateTitle": emailTitle, 
 					"TemplateSign":"Burberry",
 					"TemplateText":"精品之作 敬邀悦享 Burberry 独家壁纸 cn.burberry.com 敬邀悦享", 
 				//	"TemplateText": templateString, 	
 					"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
 				//	"TemplateImage": templateImage
 		 		};
+		 		console.log("Paylod POST for CPI/Tencent " + oPayload);
 		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
 				var oSettings = {
 						"url": sUrl,
@@ -392,12 +379,17 @@ sap.ui.define([
 				$.ajax(oSettings)
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false);
-			// if Data is undefined. Potentially by duplicates. Optional chain ? and If undefined check		
-					tencentId = results.Response.Data.InstanceId;
+					tencentId = results.Response.Data?.InstanceId;
+				if(tencentId === undefined || tencentId === '0'){
+				 	sap.m.MessageToast.show("Tencent MMS Template is not created.\n Try again.", {
+						duration: 500
+						});
+				 }else{
 					sap.m.MessageToast.show("Post done" + tencentId, {
 						duration: 500
 						});
-*/						
+					console.log("Tensent ID" + tencentId);
+						
 				//PUT the tencent status to CBO
 				// update Tencent ID and TencentStatus in CBO
 		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
@@ -410,26 +402,26 @@ sap.ui.define([
 					"dataType": "json",
 					"contentType": "application/json"
 				};
-				var that = this;
+	
 				$.ajax(oSettings)
 				.done(function(results, textStatus, XMLHttpRequest){
-					console.log("done");
 					var token = XMLHttpRequest.getResponseHeader('X-CSRF-Token');
-					console.log(token);
 					var sapUUID = results.d.results[0].SAP_UUID;
 					var sDate = new Date();
 			    	var sentDate = that._formatDateForUpsert(sDate);
 				
  			       var sUrlToInsert = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE(guid'"+sapUUID+"')";
-				 
+				   var tencentIdString = tencentId.toString();
 				   var oPayload = {
 							 		"MessageUUID": tMessageUUID,
 								    "MessageID": tMessageID,
-								    "TencentID": tencentId,
+								    "TencentID": tencentIdString,
 								    "AbilityforTemplate":"1",
 								    "TencentStatus": "created",
 								    "SentDate":sentDate            
 							 	    };
+					console.log("Paylod PUT for CBO" + oPayload);
+					
 					var oSettingsToInsert = {
 						"url": sUrlToInsert,
 						"method" : "PUT",
@@ -470,9 +462,8 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				});
-		
-				// end PUT the tencent status to CBO	
-/*				})	
+				}// end PUT the tencent status to CBO	
+				})	
 		 		.fail(function(err){
 						if (err !== undefined) {
 								var oErrorResponse = err.responseText;
@@ -482,8 +473,19 @@ sap.ui.define([
 						} else {
 							sap.m.MessageToast.show("Unknown error!");
 						}
-				});
-*/				
+			        	}); //end fail POST CreateTemplate
+					})  //done  get MessageContents 
+					.fail(function(err){
+						if (err !== undefined) {
+							oView.setBusy(false);
+							var oErrorResponse = err.responseText;
+							sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
+								duration: 6000
+							});
+						} else {
+							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
+						}
+					});
 			} //else
 		},
 	
@@ -498,9 +500,9 @@ sap.ui.define([
 			    tMessageID,
 				tTencentId,     // from CPI API response
 				tTencentStatus;
-//		var	tencentId = "11111";
 				var newTencentStatus = "gmcc OK, unicom OK, cdma OK";
-		
+		        var providerStatuses = [];
+		        
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
 					selectedRow = element.getObject();
@@ -520,16 +522,16 @@ sap.ui.define([
 						});
 			}else {
 			// call CPI API GetTemplateStatus to get Operator statuses
-/*				var oView = this.getView();
+				var oView = this.getView();
 		 		oView.setBusy(true);
+		 		var that = this;
 		 	    var oPayload = {
 		 	    	"TemplateId" : tTencentId
-		 	//		"TemplateId" : "21407"
-		 	    };
+		  	    };
 		 		var sUrl = "/API_CPI_TENCENT/GetTemplateStatus";
 				var oSettings = {
 						"url": sUrl,
-						"method" : "GET",
+						"method" : "PUT",
 						"dataType":"json",
 						"contentType":"application/JSON",
 						"data" : JSON.stringify(oPayload)
@@ -538,12 +540,17 @@ sap.ui.define([
 				$.ajax(oSettings)
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false)
-					
-					newTencentStatus = "gmcc OK, unicom OK, cdma OK";
-					sap.m.MessageToast.show("New tencent status" + newTencentStatus, {
+					var tencentStatus = results.Response.Data?.Status;
+					if (tencentStatus==='0'){
+						
+					}else{
+						providerStatuses = results.Response.Data.StatusInfo;
+						console.log( providerStatuses);
+						sap.m.MessageToast.show("New tencent status" + newTencentStatus, {
 						duration: 500
 						});
-*/						
+					}
+						
 				//PUT the tencent status to CBO
 		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
 					var oSettings = {
@@ -555,7 +562,7 @@ sap.ui.define([
 					"dataType": "json",
 					"contentType": "application/json"
 				};
-				var that = this;
+			
 				$.ajax(oSettings)
 				.done(function(results, textStatus, XMLHttpRequest){
 					var token = XMLHttpRequest.getResponseHeader('X-CSRF-Token');
@@ -585,14 +592,14 @@ sap.ui.define([
 					};
 						$.ajax(oSettingsToInsert)
 							.done(function(results,textStatus, XMLHttpRequest){
-					//			oView.setBusy(false);
+								oView.setBusy(false);
 								sap.m.MessageToast.show("Tencent Status was updated " + newTencentStatus, {
 											duration: 4000
 										});
 							})
 							.fail(function(err){
 								if (err !== undefined) {
-					//				oView.setBusy(false);
+									oView.setBusy(false);
 									var oErrorResponse = err.responseText;
 										sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
 											duration: 6000
@@ -604,7 +611,7 @@ sap.ui.define([
 				})	
 		 		.fail(function(err){
 						if (err !== undefined) {
-				//			oView.setBusy(false);
+							oView.setBusy(false);
 								var oErrorResponse = err.responseText;
 								sap.m.MessageToast.show(" ERROR Description " + oErrorResponse, {
 								duration: 6000
@@ -613,9 +620,9 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				})
-/*		})
+		})
 				// end PUT the tencent status to CBO	
-/*		 		.fail(function(err){
+		 		.fail(function(err){
 						if (err !== undefined) {
 							    oView.setBusy(false);
 								var oErrorResponse = err.responseText;
@@ -626,7 +633,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				});
-*/				
+				
 				
 			} //else
 			
