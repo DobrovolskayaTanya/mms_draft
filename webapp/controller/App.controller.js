@@ -344,18 +344,20 @@ sap.ui.define([
 						    	switch(tMessageBlocks[i].BlockType){
 						    		case 'TEXT':
 							    		contentHTMLString = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
-							    		console.log( "HTML "+contentHTMLString);
 							    		var text = contentHTMLString.replace(/<[^>]*>/g,"");
-							    	//	var image = contentHTMLString.match(/<img .*?>/g); 
-							    		var src = contentHTMLString.match(/\bsrc\=\"(.*?)\"/g);
+							    	 	var src = contentHTMLString.match(/\bsrc\=\"(.*?)\"/g);
+							    		let srcSrting;
+							    		[srcSrting] = src;
+							    		templateImage = srcSrting.slice(5,-1);
 							    		var href = contentHTMLString.match(/\bhref\=\"(.*?)\"/g);
-							    	//	var link = contentHTMLString.match(/<a .*?>/g);
-							    	
-							    		console.log( "Text "+text);
-							    	//	console.log( "Link  "+link);
-							    	//	console.log( "Image "+image);
-							    		console.log( "Src "+src);
-							    		console.log( "Href "+href);
+							    		let hrefString;
+							    		[hrefString] =href;
+							    	    var hrefLink = hrefString.slice(14,-1);
+							    	    templateString = text +  " " + hrefLink;
+							    	//	console.log( "Text "+text);
+							    	//	console.log( "templateImage  "+templateImage);
+							    	//	console.log( "HrefLink "+hrefLink);
+							    	//	console.log( "templateString "+templateString);
 							    		break;
 						    		case'SUBJECT':
 										emailTitle = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
@@ -372,16 +374,16 @@ sap.ui.define([
 					
 					//Check contentHTMLString is not empty	   
 					// POST Tencent statuses with content and within it PUT/UPDATE Tencent Status and ID in CBO
-/*				   var oPayload  = {
+				   var oPayload  = {
 		 	//		"TemplateName":"Email",
 		 			"TemplateName": tEmailName,
 			//		"TemplateTitle":"感谢您的订阅Burberry", 
 			    	"TemplateTitle": emailTitle, 
 					"TemplateSign":"Burberry",
-					"TemplateText":"精品之作 敬邀悦享 Burberry 独家壁纸 cn.burberry.com 敬邀悦享", 
-				//	"TemplateText": templateString, 	
-					"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
-				//	"TemplateImage": templateImage
+			//		"TemplateText":"精品之作 敬邀悦享 Burberry 独家壁纸 cn.burberry.com 敬邀悦享", 
+					"TemplateText": templateString, 	
+			//		"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
+					"TemplateImage": templateImage
 		 		};
 		 		console.log("Paylod POST for CPI/Tencent " + oPayload);
 		 		var sUrl = "/API_CPI_TENCENT/CreateTemplate";
@@ -491,7 +493,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 			        	}); //end fail POST CreateTemplate
-*/			        	
+			        	
 					})  //done  get MessageContents 
 					.fail(function(err){
 						if (err !== undefined) {
@@ -562,7 +564,7 @@ sap.ui.define([
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false)
 					var tencentStatus = results.Response.Data?.Status;
-					if (tencentStatus === '0' || tencentStatus === undefined){
+					if (tencentStatus === 0 || tencentStatus === undefined){
 						newTencentStatus = tTencentStatus;
 						sap.m.MessageToast.show("Template is under review.\n Check later.", {
 							duration: 2000
@@ -570,7 +572,7 @@ sap.ui.define([
 					}else{
 					statusesInfo = results.Response.Data?.StatusInfo;
 					//replase State code by OK/No/Unreviewed
-					console.log(statusesInfo.length);
+				//	console.log(statusesInfo.length);
 					   var providerStatuses = statusesInfo.map( function( el ){ 
 					   	        if(el.State === 1){
 					   	        	el.State="OK"
