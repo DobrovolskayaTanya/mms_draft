@@ -344,7 +344,18 @@ sap.ui.define([
 						    	switch(tMessageBlocks[i].BlockType){
 						    		case 'TEXT':
 							    		contentHTMLString = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
-							    		console.log( "Text "+contentHTMLString);
+							    		console.log( "HTML "+contentHTMLString);
+							    		var text = contentHTMLString.replace(/<[^>]*>/g,"");
+							    	//	var image = contentHTMLString.match(/<img .*?>/g); 
+							    		var src = contentHTMLString.match(/\bsrc\=\"(.*?)\"/g);
+							    		var href = contentHTMLString.match(/\bhref\=\"(.*?)\"/g);
+							    	//	var link = contentHTMLString.match(/<a .*?>/g);
+							    	
+							    		console.log( "Text "+text);
+							    	//	console.log( "Link  "+link);
+							    	//	console.log( "Image "+image);
+							    		console.log( "Src "+src);
+							    		console.log( "Href "+href);
 							    		break;
 						    		case'SUBJECT':
 										emailTitle = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
@@ -352,10 +363,16 @@ sap.ui.define([
 										break;
 						    		}
 						   });
-					// function to form TemplateText and cut image		   
+					contentHTMLString = "<img src=%27http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$%27 alt=%274080008_BLACK_COM_SL_3_FALSE.jpg%27  title=%274080008_BLACK_COM_SL_3_FALSE.jpg%27 style=%27opacity: 1;%27 data-sap-hpa-ceimo-image=%27SMOImage%27 data-sap-hpa-ceimo-image-type=%27Static%27 data-sap-hpa-ceimo-image-id=%2716191729918701338%27 /> <br />点击下方的下载按键<br /> <a rel=%27noopener%27 href=%27http://www.google.com%27 target=%27_blank%27 title=%27精品之作, 专属为你%27 data-sap-hpa-ceimo-link-type=%27Static%27 data-sap-hpa-ceimo-link-outboundid=%27X%27 data-sap-hpa-ceimo-link-utm=%27X%27 data-sap-hpa-ceimo-link-trackable=%27X%27 data-sap-hpa-ceimo-link-id=%2716191730884801417%27> 精品之作, 专属为你</a>"	   
+					
+				
+					// function to form TemplateText and cut image	
+					
+					
+					
 					//Check contentHTMLString is not empty	   
 					// POST Tencent statuses with content and within it PUT/UPDATE Tencent Status and ID in CBO
-				   var oPayload  = {
+/*				   var oPayload  = {
 		 	//		"TemplateName":"Email",
 		 			"TemplateName": tEmailName,
 			//		"TemplateTitle":"感谢您的订阅Burberry", 
@@ -474,6 +491,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 			        	}); //end fail POST CreateTemplate
+*/			        	
 					})  //done  get MessageContents 
 					.fail(function(err){
 						if (err !== undefined) {
@@ -486,6 +504,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
 						}
 					});
+
 			} //else
 		},
 	
@@ -552,40 +571,6 @@ sap.ui.define([
 					statusesInfo = results.Response.Data?.StatusInfo;
 					//replase State code by OK/No/Unreviewed
 					console.log(statusesInfo.length);
-			/*		statusesInfo.forEach(
-						function(element, index, array){
-							if()	
-						});
-			*/	
-				/*	
-					for(var i = 0; i<statusesInfo.length;i++){
-						switch (statusesInfo[i].State) {
-						  case '0':
-						    statusesInfo[i].State == "NO" ;
-						    break;
-						  case '1':
-						  	statusesInfo[i].State == "OK" ;
-						  	 break;
-						  case '2':
-						    statusesInfo[i].State == "Unreviewed" ;
-						    break;
-						}
-					};
-				*/
-					/*	
-						[0,1,2].forEach(function(i){
-						var concatStatuses = providerStatuses[0].Operator+" : "+ providerStatuses[0].State+" "
-							concatStatuses +=  providerStatuses[i].Operator+" : "+ providerStatuses[i].State+" ";
-								console.log(concatStatuses);
-						newTencentStatus = 	concatStatuses;
-						})
-						
-						for(var i = 1; i<providerStatuses.length;i++){
-							concatStatuses = providerStatuses[0].Operator+" : "+ providerStatuses[0].State+" "
-							concatStatuses +=  providerStatuses[i].Operator+" : "+ providerStatuses[i].State+" ";
-								console.log(concatStatuses);
-						}
-					*/
 					   var providerStatuses = statusesInfo.map( function( el ){ 
 					   	        if(el.State === 1){
 					   	        	el.State="OK"
@@ -598,9 +583,7 @@ sap.ui.define([
                                });
                        newTencentStatus =  providerStatuses.join(",");      
 					   console.log(newTencentStatus);
-				    	//results.Response.Data.StatusInfo.length;
-					//	results.Response.Data.StatusInfo[0].State;
-						sap.m.MessageToast.show("New tencent status\n" + newTencentStatus, {
+				       sap.m.MessageToast.show("New tencent status\n" + newTencentStatus, {
 							duration: 600
 						});
 					} //end else if status received	
