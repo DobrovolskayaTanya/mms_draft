@@ -499,10 +499,12 @@ sap.ui.define([
 				tMessageUUID,
 			    tMessageID,
 				tTencentId,     // from CPI API response
-				tTencentStatus;
-				var newTencentStatus = "gmcc OK, unicom OK, cdma OK";
+				tTencentStatus,
+				newTencentStatus;
+			//	var newTencentStatus = "gmcc OK, unicom OK, cdma OK";
 		        var providerStatuses = [];
-		        
+		        var statusesInfo = [];
+		   //     var concatStatuses;
 			var aContext = this.byId("table").getSelectedContexts();
 				aContext.forEach(function(element){
 					selectedRow = element.getObject();
@@ -516,7 +518,7 @@ sap.ui.define([
 				sap.m.MessageToast.show(" Select an email message" , {
 							duration: 3000				
 						});
-			}else if(tTencentStatus !== "created"){				
+			}else if(tTencentStatus === "unknown"){				
 				sap.m.MessageToast.show("Email is not sent. Send  an email for template creation" , {
 							duration: 3000
 						});
@@ -541,16 +543,69 @@ sap.ui.define([
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false)
 					var tencentStatus = results.Response.Data?.Status;
-					if (tencentStatus==='0'){
-						
-					}else{
-						providerStatuses = results.Response.Data.StatusInfo;
-						console.log( providerStatuses);
-						sap.m.MessageToast.show("New tencent status" + newTencentStatus, {
-						duration: 500
+					if (tencentStatus === '0' || tencentStatus === undefined){
+						newTencentStatus = tTencentStatus;
+						sap.m.MessageToast.show("Template is under review.\n Check later.", {
+							duration: 2000
 						});
-					}
+					}else{
+					statusesInfo = results.Response.Data?.StatusInfo;
+					//replase State code by OK/No/Unreviewed
+					console.log(statusesInfo.length);
+			/*		statusesInfo.forEach(
+						function(element, index, array){
+							if()	
+						});
+			*/	
+				/*	
+					for(var i = 0; i<statusesInfo.length;i++){
+						switch (statusesInfo[i].State) {
+						  case '0':
+						    statusesInfo[i].State == "NO" ;
+						    break;
+						  case '1':
+						  	statusesInfo[i].State == "OK" ;
+						  	 break;
+						  case '2':
+						    statusesInfo[i].State == "Unreviewed" ;
+						    break;
+						}
+					};
+				*/
+					/*	
+						[0,1,2].forEach(function(i){
+						var concatStatuses = providerStatuses[0].Operator+" : "+ providerStatuses[0].State+" "
+							concatStatuses +=  providerStatuses[i].Operator+" : "+ providerStatuses[i].State+" ";
+								console.log(concatStatuses);
+						newTencentStatus = 	concatStatuses;
+						})
 						
+						for(var i = 1; i<providerStatuses.length;i++){
+							concatStatuses = providerStatuses[0].Operator+" : "+ providerStatuses[0].State+" "
+							concatStatuses +=  providerStatuses[i].Operator+" : "+ providerStatuses[i].State+" ";
+								console.log(concatStatuses);
+						}
+					*/
+					   var providerStatuses = statusesInfo.map( function( el ){ 
+					   	        if(el.State === 1){
+					   	        	el.State="OK"
+					   	        }else if(el.State === 0){
+					   	        	el.State="NO"
+					   	        }else{
+					   	        	el.State="Unreviewed"
+					   	        }
+                                return el.Operator + " " +el.State; 
+                               });
+                       newTencentStatus =  providerStatuses.join(",");      
+					   console.log(newTencentStatus);
+				    	//results.Response.Data.StatusInfo.length;
+					//	results.Response.Data.StatusInfo[0].State;
+						sap.m.MessageToast.show("New tencent status\n" + newTencentStatus, {
+							duration: 600
+						});
+					} //end else if status received	
+				
+					
 				//PUT the tencent status to CBO
 		     	var sUrl = "/YY1_TENCENT_TEMPLATE_CDS/YY1_TENCENT_TEMPLATE?%24filter=MessageUUID+eq+'" + tMessageUUID + "'";
 					var oSettings = {
@@ -594,7 +649,7 @@ sap.ui.define([
 							.done(function(results,textStatus, XMLHttpRequest){
 								oView.setBusy(false);
 								sap.m.MessageToast.show("Tencent Status was updated " + newTencentStatus, {
-											duration: 4000
+											duration: 3000
 										});
 							})
 							.fail(function(err){
@@ -609,6 +664,7 @@ sap.ui.define([
 									}
 							});
 				})	
+				
 		 		.fail(function(err){
 						if (err !== undefined) {
 							oView.setBusy(false);
@@ -633,9 +689,8 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				});
-				
-				
-			} //else
+			
+			} //end else if tTensect status not unknown
 			
 		},
 		/**
