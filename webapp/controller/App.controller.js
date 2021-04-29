@@ -37,52 +37,7 @@ sap.ui.define([
 		this.getView().setModel(messagesModel);		//setting main model
 		this.getView().setModel(orderModel, "orderModel"); //setting model for sorter
 		this.loadMessages();
-	//	this._formatDateForUpsert();
-//		this._getMessageStatus();
-		//var messagesModel =new JSONModel();
-		/* Test data
-		messagesModel.setData({
-				"messagesSet":
-						[{
-							"EmailId": "10",
-							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
-							"Ability": "Not available",
-							"MMSID": "Unknown",
-							"Status": "Unknown",
-							"SentOn":"not sent"
-						}, {
-							"EmailId": "20",
-							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
-							"Ability": "Available",
-							"MMSID": "MMS_20",
-							"Status": "sent",
-							"SentOn":"14.03.2021"
-						}, {	
-							"EmailId": "30",
-							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
-							"Ability": "Available",
-							"MMSID": "MMS_30",
-							"Status": "Approved",
-							"SentOn":"04.03.2021"
-						},{
-							"EmailId": "50",
-							"Ability": "Available",
-							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
-							"MMSID": "MMS_50",
-							"Status": "Sent",
-							"SentOn":"04.03.2021"
-						},  {
-							"EmailId": "60",
-							"Ability": "Available",
-							"EmailName":"AW20_GL_H_LNY_Gifting_3_Main_W442021",
-							"MMSID": "MMS_60",
-							"Status": "Approved",
-							"SentOn":"04.02.2021"
-						}]
-			});
 
-	//	emailModel.loadData("model/email.json");
-	*/
 	},
 		/*
 			SAP Marketing allows to retrieve maximum of 100 messages per call.
@@ -345,15 +300,21 @@ sap.ui.define([
 						    		case 'TEXT':
 							    		contentHTMLString = tMessageBlocks[i].MessageBlockContents.results[0].BlockContentHTMLString;
 							    		var text = contentHTMLString.replace(/<[^>]*>/g,"");
+							 	//Check contentHTMLString is not empty Error function     		
 							    	 	var src = contentHTMLString.match(/\bsrc\=\"(.*?)\"/g);
 							    		let srcSrting;
 							    		[srcSrting] = src;
 							    		templateImage = srcSrting.slice(5,-1);
 							    		var href = contentHTMLString.match(/\bhref\=\"(.*?)\"/g);
-							    		let hrefString;
-							    		[hrefString] =href;
-							    	    var hrefLink = hrefString.slice(14,-1);
-							    	    templateString = text +  " " + hrefLink;
+							    //		console.log(href);
+							    		if(href!==null){
+								    		let hrefString;
+								    		[hrefString] =href;
+								    	    var hrefLink = hrefString.slice(14,-1);
+								    	    templateString = text +  " " + hrefLink;
+							    	    }else{
+							    	    	templateString = text;
+							    	    }
 							    	//	console.log( "Text "+text);
 							    	//	console.log( "templateImage  "+templateImage);
 							    	//	console.log( "HrefLink "+hrefLink);
@@ -365,24 +326,14 @@ sap.ui.define([
 										break;
 						    		}
 						   });
-					contentHTMLString = "<img src=%27http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$%27 alt=%274080008_BLACK_COM_SL_3_FALSE.jpg%27  title=%274080008_BLACK_COM_SL_3_FALSE.jpg%27 style=%27opacity: 1;%27 data-sap-hpa-ceimo-image=%27SMOImage%27 data-sap-hpa-ceimo-image-type=%27Static%27 data-sap-hpa-ceimo-image-id=%2716191729918701338%27 /> <br />点击下方的下载按键<br /> <a rel=%27noopener%27 href=%27http://www.google.com%27 target=%27_blank%27 title=%27精品之作, 专属为你%27 data-sap-hpa-ceimo-link-type=%27Static%27 data-sap-hpa-ceimo-link-outboundid=%27X%27 data-sap-hpa-ceimo-link-utm=%27X%27 data-sap-hpa-ceimo-link-trackable=%27X%27 data-sap-hpa-ceimo-link-id=%2716191730884801417%27> 精品之作, 专属为你</a>"	   
+			//		contentHTMLString = "<img src=%27http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$%27 alt=%274080008_BLACK_COM_SL_3_FALSE.jpg%27  title=%274080008_BLACK_COM_SL_3_FALSE.jpg%27 style=%27opacity: 1;%27 data-sap-hpa-ceimo-image=%27SMOImage%27 data-sap-hpa-ceimo-image-type=%27Static%27 data-sap-hpa-ceimo-image-id=%2716191729918701338%27 /> <br />点击下方的下载按键<br /> <a rel=%27noopener%27 href=%27http://www.google.com%27 target=%27_blank%27 title=%27精品之作, 专属为你%27 data-sap-hpa-ceimo-link-type=%27Static%27 data-sap-hpa-ceimo-link-outboundid=%27X%27 data-sap-hpa-ceimo-link-utm=%27X%27 data-sap-hpa-ceimo-link-trackable=%27X%27 data-sap-hpa-ceimo-link-id=%2716191730884801417%27> 精品之作, 专属为你</a>"	   
 					
-				
-					// function to form TemplateText and cut image	
-					
-					
-					
-					//Check contentHTMLString is not empty	   
 					// POST Tencent statuses with content and within it PUT/UPDATE Tencent Status and ID in CBO
 				   var oPayload  = {
-		 	//		"TemplateName":"Email",
 		 			"TemplateName": tEmailName,
-			//		"TemplateTitle":"感谢您的订阅Burberry", 
 			    	"TemplateTitle": emailTitle, 
 					"TemplateSign":"Burberry",
-			//		"TemplateText":"精品之作 敬邀悦享 Burberry 独家壁纸 cn.burberry.com 敬邀悦享", 
-					"TemplateText": templateString, 	
-			//		"TemplateImage":"http://s7g10.scene7.com/is/image/BurberryTest/D66D0AA8-1A94-41C0-8545-A8C5A68CC670?$BBY_V2_B_1X1$"
+					"TemplateText": templateString,
 					"TemplateImage": templateImage
 		 		};
 		 		console.log("Paylod POST for CPI/Tencent " + oPayload);
@@ -398,7 +349,10 @@ sap.ui.define([
 				$.ajax(oSettings)
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false);
-					tencentId = results.Response.Data?.InstanceId;
+				var response = results.Response.Data;
+				if(response !== undefined){
+						tencentId = results.Response.Data.InstanceId;
+					}
 				if(tencentId === undefined || tencentId === '0'){
 				 	sap.m.MessageToast.show("Tencent MMS Template is not created.\n Try again.", {
 						duration: 500
@@ -563,14 +517,17 @@ sap.ui.define([
 				$.ajax(oSettings)
 					.done(function(results,textStatus, XMLHttpRequest){
 					oView.setBusy(false)
-					var tencentStatus = results.Response.Data?.Status;
+					var response = results.Response.Data;
+					if(response !== undefined){
+						var tencentStatus = results.Response.Data.Status;
+					}
 					if (tencentStatus === 0 || tencentStatus === undefined){
 						newTencentStatus = tTencentStatus;
 						sap.m.MessageToast.show("Template is under review.\n Check later.", {
-							duration: 2000
+							duration: 3000
 						});
 					}else{
-					statusesInfo = results.Response.Data?.StatusInfo;
+					statusesInfo = results.Response.Data.StatusInfo;    //change syntax
 					//replase State code by OK/No/Unreviewed
 				//	console.log(statusesInfo.length);
 					   var providerStatuses = statusesInfo.map( function( el ){ 
@@ -633,9 +590,11 @@ sap.ui.define([
 						$.ajax(oSettingsToInsert)
 							.done(function(results,textStatus, XMLHttpRequest){
 								oView.setBusy(false);
+								if(newTencentStatus !=='created'){
 								sap.m.MessageToast.show("Tencent Status was updated " + newTencentStatus, {
 											duration: 3000
 										});
+								}
 							})
 							.fail(function(err){
 								if (err !== undefined) {
@@ -834,8 +793,6 @@ sap.ui.define([
 		 /**
 		 * Function to check if email contains more than 1 image or 1 link
 		 * @private
-		 * Example string
-		 * "Message with empty subject and two images<img src="http://s7g10.scene7.com/is/image/BurberryTest/05C0B8AB-737E-4FFB-8F45-084943E2F96C?$BBY_V2_B_4X3$" alt="77777771_black3P_pt=sl_3P_23.jpg" title="77777771_black3P_pt=sl_3P_23.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142219601539" /><img src="http://s7g10.scene7.com/is/image/BurberryTest/42371C70-DF3E-4A57-99D0-4B83F138C3C4?$BBY_V2_B_4X3$" alt="45533011_black_pt=sl_5.jpg" title="45533011_black_pt=sl_5.jpg" style="opacity: 1;" data-sap-hpa-ceimo-image="SMOImage" data-sap-hpa-ceimo-image-type="Static" data-sap-hpa-ceimo-image-id="16177142459331634" />"
 		 */
 		 _checkContentString:function(oContentString,sMessageUUID,sMessageID){
 		 	const imageStr = "<img";
@@ -847,14 +804,14 @@ sap.ui.define([
 		    countImage = this.countOccurances(oContentString,imageStr);
 		     //find and count occurrences of Link -> Substring href=
 		    countLink = this.countOccurances(oContentString,linkStr);
-		    if(countImage <= 1 && countLink <= 1){
+		    if(countImage === 1 && countLink <= 1){
 		    	isTemplateAvailable = true;
 		    	console.log("isTemplateAvailable" +isTemplateAvailable);
 		    	console.log("countImage" +countImage+ "countLink"+ countLink);
 		    }else{
 		    	console.log("isTemplateAvailable" +isTemplateAvailable);
 		    	console.log("countImage" +countImage+ "countLink"+ countLink);
-		    	sap.m.MessageToast.show(" Email can contain one image or one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
+		    	sap.m.MessageToast.show(" Email can contain at least one image and no more then one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
 								duration: 5000
 							});
 		    }
