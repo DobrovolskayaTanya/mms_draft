@@ -107,7 +107,7 @@
 								text="{MMSID}" />
 							<ObjectStatus
 								text="{Status}"
-								state ="{=	${Status} === 'unknown' ? 'Error': 'Success'}"/>
+								state ="{=	${Status} === 'gmcc OK,unicom OK,cdma OK' ? 'Success' : 'Error'}"/>
 						
 							<ObjectStatus
 								text="{

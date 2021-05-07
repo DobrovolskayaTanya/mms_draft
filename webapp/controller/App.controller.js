@@ -286,9 +286,8 @@ sap.ui.define([
 					$expand: "MessageBlockContents"
 				};
 
-				var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + tMessageUUID + "',LanguageCode='ZH')/MessageBlocks";
-		//		var self = this;
-			var that = this;
+			var sUrl = "/API_MKT_CAMPAIGN_MESSAGE_SRV/MessageContents(MessageUUID=guid'" + tMessageUUID + "',LanguageCode='ZH')/MessageBlocks";
+	       	var that = this;
 		 	oView.setBusy(true);
 		// to get Email name		
 				$.get(sUrl,oParams)
@@ -411,7 +410,7 @@ sap.ui.define([
 								sap.m.MessageToast.show("TencentID was updated " + tencentId, {
 											duration: 4000
 										});
-							})
+							}, that.loadMessages())							//refresh page
 							.fail(function(err){
 								if (err !== undefined) {
 									oView.setBusy(false);
@@ -424,7 +423,7 @@ sap.ui.define([
 									}
 							});
 					
-				})	
+				})					
 		 		.fail(function(err){
 						if (err !== undefined) {
 								var oErrorResponse = err.responseText;
@@ -434,7 +433,7 @@ sap.ui.define([
 						} else {
 							sap.m.MessageToast.show("Unknown error!");
 						}
-				});
+				});				
 				}// end PUT the tencent status to CBO	
 				})	
 		 		.fail(function(err){
@@ -448,7 +447,7 @@ sap.ui.define([
 						}
 			        	}); //end fail POST CreateTemplate
 			        	
-					})  //done  get MessageContents 
+					})  //done  get MessageContents                   
 					.fail(function(err){
 						if (err !== undefined) {
 							oView.setBusy(false);
@@ -460,7 +459,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error. Turn to the support team!");
 						}
 					});
-
+//         this.loadMessages();
 			} //else
 		},
 	
@@ -620,7 +619,7 @@ sap.ui.define([
 							sap.m.MessageToast.show("Unknown error!");
 						}
 				})
-		})
+		}, this.loadMessages())								//refresh page
 				// end PUT the tencent status to CBO	
 		 		.fail(function(err){
 						if (err !== undefined) {
@@ -752,7 +751,12 @@ sap.ui.define([
 					.done(function(results){
 						oView.setBusy(false);
 						aMessageBlocks = results.d.results;
-			// check it is not empty.Translated on Chinese			
+						if(aMessageBlocks.length === 0){ 			// check it is not empty.Translated on Chinese	
+							sap.m.MessageToast.show("The email has to be translated to Chinese", {
+											duration: 4000,
+											width:"20em"
+										});
+						} else {
 						if(aMessageBlocks.length === 2){
 						   // for (var i = 0; aMessageBlocks.length-1; i++){
 						   [0,1].forEach(function(i){
@@ -769,16 +773,16 @@ sap.ui.define([
 						    		}
 						    	}
 						   });
-						   // 	}
 						}else{
 							oView.setBusy(false);
 							self._sendAbilityStatus("0", "NO",sMessageUUID,sMessageID);
 							sap.m.MessageToast.show("Email has to contain only one Text block", {
 							duration: 6000,
 							width:"20em"
-							});
-						}
-					})
+								});
+							}
+						} // end if/else is undefined
+					})                  			 
 					.fail(function(err){
 						if (err !== undefined) {
 							var oErrorResponse = err.responseText;
@@ -797,21 +801,25 @@ sap.ui.define([
 		 _checkContentString:function(oContentString,sMessageUUID,sMessageID){
 		 	const imageStr = "<img";
 		 	const linkStr = "href=";
+		 	const dynAttr = "|%";
 		 	let countImage = 0;
 			let countLink = 0;
+			let countDynAttr = 0;
 			let isTemplateAvailable = false;   // Block scope. Check that is cleaned before next run
 		    //find and count occurrences of Image -> Substring <img src=	
 		    countImage = this.countOccurances(oContentString,imageStr);
 		     //find and count occurrences of Link -> Substring href=
 		    countLink = this.countOccurances(oContentString,linkStr);
-		    if(countImage === 1 && countLink <= 1){
+		     //find and count occurrences of Dynamic ettribute 
+		    countDynAttr = this.countOccurances(oContentString,dynAttr);
+		    if(countImage === 1 && countLink <= 1 && countDynAttr === 0){
 		    	isTemplateAvailable = true;
-		    	console.log("isTemplateAvailable" +isTemplateAvailable);
-		    	console.log("countImage" +countImage+ "countLink"+ countLink);
+		 //   	console.log("isTemplateAvailable" +isTemplateAvailable);
+		 //  	console.log("countImage" +countImage+ "countLink"+ countLink);
 		    }else{
 		    	console.log("isTemplateAvailable" +isTemplateAvailable);
 		    	console.log("countImage" +countImage+ "countLink"+ countLink);
-		    	sap.m.MessageToast.show(" Email can contain at least one image and no more then one link.\n Number of images is " + countImage +"\n Number of links is " + countLink,{
+		    	sap.m.MessageToast.show(" Email can contain at least one image and no more then one link.\nDynamic attributes are not allowed.\n Number of images is " + countImage +"\n Number of links is " + countLink + "\n Number of links is " + countDynAttr,{
 								duration: 5000
 							});
 		    }
@@ -912,7 +920,7 @@ sap.ui.define([
 									}
 							});
 					
-				})	
+				}, this.loadMessages())					// refresh page
 		 		.fail(function(err){
 						if (err !== undefined) {
 								var oErrorResponse = err.responseText;
